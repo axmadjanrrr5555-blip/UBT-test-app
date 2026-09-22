@@ -9,7 +9,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-image: url("https://img.magnific.com/fotos-premium/vista-panoramica-lago-montanas-contra-cielo_1048944-656242.jpg?semt=ais_hybrid&w=740");
+        background-image: url("https://i.pinimg.com/originals/cb/80/c2/cb80c282f7e5b67cd3cbbc8103bdd54b.jpg");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;

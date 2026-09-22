@@ -9,14 +9,12 @@ st.set_page_config(page_title="KASUM AHMAD - TRADING TEST", layout="wide")
 st.markdown(
     """
     <style>
-    /* Негізгі фон - Трейдинг күңгірт фоны */
     .stApp {
         background-color: #0b0e14 !important;
         background-image: radial-gradient(circle at 50% 20%, #131722 0%, #0b0e14 100%);
         font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
     }
     
-    /* Неонды Тақырыптар */
     .main-title {
         font-size: 70px;
         font-weight: 900;
@@ -38,20 +36,17 @@ st.markdown(
         text-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
     }
 
-    /* Мәтіндер мен тақырыпшалар */
     h1, h2, h3, h4, h5, h6, p, label, div, span, small, li { 
         color: #D1D4DC !important; 
         font-weight: 600 !important;
     }
     
-    /* Терминал стильді карточкалар */
     div[data-testid="stMetricValue"] {
         color: #00FF66 !important;
         font-size: 32px !important;
         font-weight: bold;
     }
 
-    /* Батырмалар - Trading Order Button */
     .stButton>button { 
         background: linear-gradient(135deg, #1e222d 0%, #2a2e39 100%) !important; 
         color: #00FF66 !important; 
@@ -69,7 +64,6 @@ st.markdown(
         box-shadow: 0 0 20px rgba(0, 255, 102, 0.8);
     }
 
-    /* Енгізу өрістері (Input / Selectbox) */
     .stTextInput>div>div>input, .stSelectbox>div>div {
         color: #00FF66 !important;
         background-color: #1e222d !important;
@@ -77,7 +71,6 @@ st.markdown(
         border-radius: 6px;
     }
 
-    /* Табтарды әрлеу */
     .stTabs [data-baseweb="tab-list"] {
         background-color: #131722;
         border-radius: 8px;
@@ -145,7 +138,7 @@ if "logged_user" not in st.session_state:
 
 curr_time = time.time()
 
-# --- КІРУ БОЛЫМЫ ---
+# --- КІРУ БӨЛІМІ ---
 if not st.session_state.logged_user:
     st.subheader("🔑 Trading Terminal Login")
     col1, col2 = st.columns([1, 1])
@@ -194,32 +187,74 @@ else:
 
     # --- ДИРЕКТОР ПАНЕЛІ ---
     if role == "director":
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
             [
+                "📊 Оқушылар Графигі",
                 "🖥️ Кіру Тарихы",
                 "🔑 Аккаунттар",
-                "📊 Нәтижелер",
+                "📋 Тест Нәтижелері",
                 "🔓 Банды Шешу",
                 "🔐 Доступ Реттеу",
             ]
         )
 
         with tab1:
+            st.subheader("📈 Оқушылардың графиктерін қарау")
+            if not st.session_state.results:
+                st.info("ℹ️ Әлі ешқандай оқушы тест тапсырмады.")
+            else:
+                # Барлық тест тапсырған оқушылардың тізімін алу
+                student_list = list(
+                    set(r["user"] for r in st.session_state.results)
+                )
+                selected_student = st.selectbox(
+                    "Оқушыны таңдаңыз:", student_list
+                )
+
+                student_results = [
+                    r
+                    for r in st.session_state.results
+                    if r["user"] == selected_student
+                ]
+
+                st.write(
+                    f"**{selected_student}** оқушысының тапсырған тесттері ({len(student_results)} рет):"
+                )
+
+                for idx, res in enumerate(reversed(student_results)):
+                    st.markdown(
+                        f"--- \n 🕒 **Уақыты:** {res['time']} | 📚 **Пән:** {res['subject']} | 🎯 **Балл:** `{res['score']}`"
+                    )
+
+                    # График сызу
+                    cumulative_profit = [0]
+                    curr = 0
+                    for s in res["step_scores"]:
+                        curr += s
+                        cumulative_profit.append(curr)
+
+                    st.line_chart(
+                        pd.DataFrame(
+                            {"Балл тренді": cumulative_profit}
+                        )
+                    )
+
+        with tab2:
             for log in reversed(st.session_state.login_logs):
                 st.write(
                     f"⏱️ `{log['time']}` | 👤 User: **{log['user']}** ({log['role']})"
                 )
 
-        with tab2:
+        with tab3:
             st.json(st.session_state.users)
 
-        with tab3:
+        with tab4:
             for r in st.session_state.results:
                 st.write(
                     f"📈 **{r['user']}** | 📚 {r['subject']} | 🕒 {r['time']} | 🎯 Балл: `{r['score']}`"
                 )
 
-        with tab4:
+        with tab5:
             for u_name, u_data in st.session_state.users.items():
                 if u_data["ban_until"] > curr_time:
                     if st.button(f"Unban: {u_name}"):
@@ -228,7 +263,7 @@ else:
                         st.success(f"{u_name} баннан шығарылды!")
                         st.rerun()
 
-        with tab5:
+        with tab6:
             allow_zam = st.checkbox(
                 "Зам директорға сұрақ қосуға рұқсат",
                 value=st.session_state.can_zam_add_q,
@@ -354,7 +389,7 @@ else:
                     }
                     st.success("Оқушы сәтті қосылды!")
 
-    # --- ОҚУШЫ ТЕСТІ ЖӘНЕ ГРАФИК ---
+    # --- ОҚУШЫ ТЕСТІ ЖӘНЕ НӘТИЖЕНІ ДИРЕКТОРҒА ЖІБЕРУ ---
     if role == "student":
         subject = st.selectbox(
             "Пән таңдаңыз:", list(st.session_state.questions.keys())
@@ -370,7 +405,6 @@ else:
 
                 opts = {k: v for k, v in q["options"].items() if v.strip()}
 
-                # 1 дұрыс жауап немесе 4 вариант -> Radio Button
                 if len(opts) <= 4 or len(q["correct"]) == 1:
                     formatted = [f"{k}) {v}" for k, v in opts.items()]
                     ans = st.radio(
@@ -394,17 +428,20 @@ else:
                     c_ans = set(q["correct"])
                     if u_ans == c_ans and len(u_ans) > 0:
                         score += 1
-                        step_scores.append(1)  # Дұрыс
+                        step_scores.append(1)
                     else:
-                        step_scores.append(-1)  # Қате
+                        step_scores.append(-1)
 
                 wrong_score = len(q_list) - score
+
+                # Нәтижелерді және график мәліметтерін базаға (Директорға) сақтау
                 st.session_state.results.append(
                     {
                         "user": st.session_state.logged_user,
                         "subject": subject,
                         "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
                         "score": f"{score}/{len(q_list)}",
+                        "step_scores": step_scores,  # Директор кабинетіне график болып өтеді
                     }
                 )
 
@@ -414,24 +451,13 @@ else:
                 col_m2.metric("🟢 Дұрыс (Long)", f"{score}")
                 col_m3.metric("🔴 Қате (Short)", f"{wrong_score}")
 
-                # --- TRADING STYLE LINE / BAR CHART (Native Streamlit) ---
-                st.subheader("📈 Трейдингтік Динамика Графигі")
-
+                st.subheader("📈 Сенің Трейдингтік Динамикаң:")
                 cumulative_profit = [0]
                 curr = 0
                 for s in step_scores:
                     curr += s
                     cumulative_profit.append(curr)
 
-                chart_df = pd.DataFrame(
-                    {"Тренд сұрақтар бойынша": cumulative_profit}
+                st.line_chart(
+                    pd.DataFrame({"Өсім тренді": cumulative_profit})
                 )
-                st.line_chart(chart_df)
-
-                bar_df = pd.DataFrame(
-                    {
-                        "Көрсеткіш": ["Дұрыс (Long)", "Қате (Short)"],
-                        "Саны": [score, wrong_score],
-                    }
-                ).set_index("Көрсеткіш")
-                st.bar_chart(bar_df)

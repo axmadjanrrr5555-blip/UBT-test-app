@@ -1,19 +1,28 @@
 import streamlit as st
 
-# Страница баптаулары
+# Настройки страницы
 st.set_page_config(page_title="Қасым Ахмад", page_icon="🎓", layout="wide")
 
-# CSS стилін қолдану (Қате шықпас үшін үштік тырнақшаға оралған)
+# CSS стили с заголовками по углам
 st.markdown("""
 <style>
     .stApp {
         background-color: #121824;
         color: #ffffff;
     }
-    h1 {
-        color: #60a5fa !important;
-        text-align: center;
-        text-transform: uppercase;
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        width: 100%;
+        margin-bottom: 30px;
+    }
+    .header-title {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #adff2f;
+        text-shadow: 0 0 10px rgba(173, 255, 47, 0.4);
         letter-spacing: 2px;
     }
     .stButton>button {
@@ -23,9 +32,14 @@ st.markdown("""
         border-radius: 8px;
     }
 </style>
+
+<div class="header-container">
+    <div class="header-title">ҚАСЫМ</div>
+    <div class="header-title">АХМАД</div>
+</div>
 """, unsafe_allow_html=True)
 
-# Сессия жадын инициализациялау
+# Инициализация состояния
 if 'question_limit' not in st.session_state:
     st.session_state.question_limit = 10
 if 'questions' not in st.session_state:
@@ -35,14 +49,11 @@ if 'logged_in' not in st.session_state:
 if 'user_role' not in st.session_state:
     st.session_state.user_role = None
 
-# Бас тақырып (Заголовок)
-st.markdown("<h1>Қасым Ахмад</h1>", unsafe_allow_html=True)
-
-# ----------------- АВТОРИЗАЦИЯ БӨЛІМІ -----------------
+# ----------------- ФОРМА ВХОДА -----------------
 if not st.session_state.logged_in:
     st.subheader("🔑 Жүйеге кіру")
     
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([1, 1])
     with col1:
         username = st.text_input("Логин:")
         password = st.text_input("Пароль:", type="password")
@@ -56,27 +67,23 @@ if not st.session_state.logged_in:
             elif username == "zam" and password == "123":
                 st.session_state.logged_in = True
                 st.session_state.user_role = "zam"
-                st.success("Зам (Орынбасар) болып кірдіңіз!")
+                st.success("Зам болып кірдіңіз!")
                 st.rerun()
             else:
                 st.error("Логин немесе пароль қате!")
 
-    st.info("Демо кіру мағлұматы:\n- **Директор**: логин: `director`, пароль: `123`\n- **Зам**: логин: `zam`, пароль: `123`")
-
-# ----------------- АВТОРИЗАЦИЯДАН ӨТКЕННӘН КЕЙІН -----------------
+# ----------------- ЛИЧНЫЙ КАБИНЕТ -----------------
 else:
-    # Шығу батырмасы Sidebar-да
     st.sidebar.write(f"**Ағымдағы пайдаланушы:** {st.session_state.user_role.upper()}")
     if st.sidebar.button("Жүйеден шығу"):
         st.session_state.logged_in = False
         st.session_state.user_role = None
         st.rerun()
 
-    # ----------------- ДИРЕКТОР КАБИНЕТІ -----------------
+    # КАБИНЕТ ДИРЕКТОРА
     if st.session_state.user_role == "director":
         st.header("👨‍💼 Директор кабинеті")
         
-        # Лимит орнату
         st.subheader("⚙️ Сұрақтар лимитін басқару")
         c1, c2 = st.columns([2, 1])
         with c1:
@@ -91,11 +98,10 @@ else:
         st.info(f"📊 Жалпы лимит: **{st.session_state.question_limit}** | Еңгізілген сұрақтар: **{len(st.session_state.questions)}**")
         st.divider()
 
-        # Бір дұрыс жауабы бар сұрақ қосу
         st.subheader("➕ Бір дұрыс жауабы бар сұрақ қосу")
         
         if len(st.session_state.questions) >= st.session_state.question_limit:
-            st.warning("⚠️ Сұрақтар лимиті толды! Жаңа сұрақ қоса алмайсыз.")
+            st.warning("⚠️ Сұрақтар лимиті толды!")
         else:
             q_text = st.text_area("Сұрақ мәтіні:", key="single_q")
             opt_a = st.text_input("A варианты:", key="s_a")
@@ -122,13 +128,12 @@ else:
                 else:
                     st.error("Барлық өрістерді толтырыңыз!")
 
-    # ----------------- ЗАМ (ОРЫНБАСАР) КАБИНЕТІ -----------------
+    # КАБИНЕТ ЗАМА
     elif st.session_state.user_role == "zam":
         st.header("🧑‍💼 Зам (Орынбасар) кабинеті")
         st.info(f"📊 Директор белгілеген лимит: **{st.session_state.question_limit}** | Еңгізілген сұрақтар: **{len(st.session_state.questions)}**")
         st.divider()
 
-        # Бірнеше дұрыс жауабы бар сұрақ қосу
         st.subheader("➕ Бірнеше дұрыс жауабы бар сұрақ қосу")
 
         if len(st.session_state.questions) >= st.session_state.question_limit:
@@ -173,7 +178,7 @@ else:
                 else:
                     st.error("Барлық өрістерді толтырыңыз!")
 
-    # ----------------- ҚОСЫЛҒАН СҰРАҚТАР ТІЗІМІ -----------------
+    # СПИСОК ВОПРОСОВ
     st.divider()
     st.subheader("📋 Қосылған сұрақтар тізімі")
     if len(st.session_state.questions) == 0:

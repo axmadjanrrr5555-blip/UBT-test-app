@@ -11,7 +11,7 @@ st.markdown(
     .stButton>button { background-color: #111; color: #00FF00; border: 1px solid #00FF00; }
     </style>
 """,
-    unsafe_style_script=True,
+    unsafe_allow_html=True,
 )
 
 st.title("🟢 ҰБТ Басқару Жүйесі")
@@ -194,5 +194,3 @@ else:
                 }
             )
             st.success(f"Тест аяқталды! Нәтижеңіз: {score}")
-
-

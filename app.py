@@ -4,12 +4,12 @@ import streamlit as st
 
 st.set_page_config(page_title="KASUM AHMAD", layout="wide")
 
-# Артқы фонға ТАУДЫҢ (Mountain background) суретін қосу
+# Жіберілген көк-сұр текстуралық фонды қосу
 st.markdown(
     """
     <style>
     .stApp {
-        background-image: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop");
+        background-image: url("https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2000&auto=format&fit=crop");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -23,7 +23,7 @@ st.markdown(
         color: #ffffff;
         margin-bottom: 0px;
         line-height: 1;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
     }
     
     .sub-title {
@@ -34,16 +34,16 @@ st.markdown(
         text-align: right;
         margin-top: 0px;
         line-height: 1;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
     }
     
     h1, h2, h3, h4, h5, h6, p, label, div, span, input { 
         color: #ffffff !important; 
-        text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
     }
     
     .stButton>button { 
-        background-color: rgba(0, 0, 0, 0.6); 
+        background-color: rgba(0, 0, 0, 0.4); 
         color: #ffffff; 
         border: 1px solid #ffffff; 
         border-radius: 5px;

@@ -1,6 +1,6 @@
 body {
     margin: 0;
-    background-image: url("background.jpg");
+    background-image: url("blob:https://web.whatsapp.com/fd75b602-e62c-404c-b2d4-f01a37ca839b.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

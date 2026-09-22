@@ -1,15 +1,16 @@
-import time
 from datetime import datetime
+import time
+import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="KASUM AHMAD", layout="wide")
 
-# Жіберілген көк-сұр текстуралық фонды қосу
+# Жіберілген көк-сұр текстуралық фон және БАРЛЫҚ МӘТІНДЕРДІ ҚЫЗЫЛ ҚЫЛУ CSS-і
 st.markdown(
     """
     <style>
     .stApp {
-        background-image: url("https://i.pinimg.com/originals/cb/80/c2/cb80c282f7e5b67cd3cbbc8103bdd54b.jpg");
+        background-image: url("https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2000&auto=format&fit=crop");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -20,33 +21,44 @@ st.markdown(
         font-size: 80px;
         font-weight: 800;
         letter-spacing: 5px;
-        color: #ffffff;
+        color: #ff3333 !important;
         margin-bottom: 0px;
         line-height: 1;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
     }
     
     .sub-title {
         font-size: 80px;
         font-weight: 800;
         letter-spacing: 5px;
-        color: #ffffff;
+        color: #ff3333 !important;
         text-align: right;
         margin-top: 0px;
         line-height: 1;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
     }
     
-    h1, h2, h3, h4, h5, h6, p, label, div, span, input { 
-        color: #ffffff !important; 
-        text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+    /* Барлық сөздерді және жазуларды қызыл қылу */
+    h1, h2, h3, h4, h5, h6, p, label, div, span, input, button, small, li { 
+        color: #ff3333 !important; 
+        font-weight: bold !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
     }
     
+    /* Батырмалардың стильдері */
     .stButton>button { 
-        background-color: rgba(0, 0, 0, 0.4); 
-        color: #ffffff; 
-        border: 1px solid #ffffff; 
-        border-radius: 5px;
+        background-color: rgba(0, 0, 0, 0.6) !important; 
+        color: #ff3333 !important; 
+        border: 2px solid #ff3333 !important; 
+        border-radius: 8px;
+        font-size: 16px !important;
+    }
+
+    /* Input және Selectbox қызыл түсі */
+    .stTextInput>div>div>input {
+        color: #ff3333 !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        border: 1px solid #ff3333 !important;
     }
     </style>
 """,
@@ -71,7 +83,13 @@ if "users" not in st.session_state:
 
 if "questions" not in st.session_state:
     st.session_state.questions = {
-        "Математика": [],
+        "Математика": [
+            {
+                "q": "2 + 2 = ?",
+                "options": {"A": "3", "B": "4", "C": "5", "D": "6"},
+                "correct": "B",
+            }
+        ],
         "Қазақстан тарихы": [],
         "Оқу сауаттылығы": [],
     }
@@ -244,7 +262,7 @@ else:
                     }
                     st.success("Оқушы қосылды!")
 
-    # --- ОҚУШЫ ТЕСТІ ---
+    # --- ОҚУШЫ ТЕСТІ (ГРАФИК БАР) ---
     if role == "student":
         subject = st.selectbox(
             "Пән таңдаңыз:", list(st.session_state.questions.keys())
@@ -268,6 +286,8 @@ else:
                     for i, q in enumerate(q_list)
                     if user_answers.get(i) == q["correct"]
                 )
+                wrong_score = len(q_list) - score
+
                 st.session_state.results.append(
                     {
                         "user": st.session_state.logged_user,
@@ -276,4 +296,15 @@ else:
                         "score": f"{score}/{len(q_list)}",
                     }
                 )
+
                 st.success(f"Нәтиже: {score} / {len(q_list)}")
+
+                # --- ГРАФИК КӨРСЕТУ ---
+                st.subheader("📊 Тест Нәтижесінің Графигі")
+                chart_data = pd.DataFrame(
+                    {
+                        "Көрсеткіш": ["Дұрыс", "Қате"],
+                        "Саны": [score, wrong_score],
+                    }
+                )
+                st.bar_chart(chart_data.set_index("Көрсеткіш"))

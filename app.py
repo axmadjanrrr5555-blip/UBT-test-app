@@ -3,24 +3,18 @@ body {
     background-image: url("background.jpg");
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+
     font-family: Arial, sans-serif;
     color: white;
 }
 
-.hero {
-    position: relative;
-    min-height: 100vh;
-    overflow: hidden;
-}
-
 .name {
     position: absolute;
-    margin: 0;
     font-size: 150px;
     font-weight: 400;
     color: #eeeeee;
-    letter-spacing: -5px;
 }
 
 .name1 {

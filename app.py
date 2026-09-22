@@ -86,8 +86,16 @@ if "questions" not in st.session_state:
         "Математика": [
             {
                 "q": "2 + 2 = ?",
-                "options": {"A": "3", "B": "4", "C": "5", "D": "6"},
-                "correct": "B",
+                "options": {
+                    "A": "3",
+                    "B": "4",
+                    "C": "5",
+                    "D": "6",
+                    "E": "",
+                    "F": "",
+                },
+                "correct": ["B"],
+                "image": "",
             }
         ],
         "Қазақстан тарихы": [],
@@ -222,19 +230,58 @@ else:
                     "Пән:", list(st.session_state.questions.keys())
                 )
                 q_text = st.text_input("Сұрақ:")
+                img_url = st.text_input(
+                    "🖼️ Сұраққа сурет сілтемесі (міндетті емес URL):"
+                )
+
+                st.write("Варианттар (А-дан F-ке дейін):")
                 col1, col2 = st.columns(2)
                 with col1:
                     opt_a = st.text_input("A жауабы:")
                     opt_b = st.text_input("B жауабы:")
-                with col2:
                     opt_c = st.text_input("C жауабы:")
+                with col2:
                     opt_d = st.text_input("D жауабы:")
-                correct_opt = st.radio(
-                    "Дұрыс нұсқа:", ["A", "B", "C", "D"], horizontal=True
-                )
+                    opt_e = st.text_input("E жауабы (міндетті емес):")
+                    opt_f = st.text_input("F жауабы (міндетті емес):")
+
+                st.write("Дұрыс жауап(тар)ды белгілеңіз (3-ке дейін):")
+                corr_a = st.checkbox("A дұрыс")
+                corr_b = st.checkbox("B дұрыс")
+                corr_c = st.checkbox("C дұрыс")
+                corr_d = st.checkbox("D дұрыс")
+                corr_e = st.checkbox("E дұрыс")
+                corr_f = st.checkbox("F дұрыс")
+
+                correct_selected = []
+                if corr_a:
+                    correct_selected.append("A")
+                if corr_b:
+                    correct_selected.append("B")
+                if corr_c:
+                    correct_selected.append("C")
+                if corr_d:
+                    correct_selected.append("D")
+                if corr_e:
+                    correct_selected.append("E")
+                if corr_f:
+                    correct_selected.append("F")
 
                 if st.button("Сұрақты сақтау"):
-                    if q_text and opt_a and opt_b and opt_c and opt_d:
+                    # Егер 4-тен көп вариант толтырылмаса (E мен F бос болса) -> Автоматты 1 дұрыс жауап
+                    has_extra_opts = bool(
+                        opt_e.strip() != "" or opt_f.strip() != ""
+                    )
+
+                    if not q_text or not (opt_a and opt_b and opt_c and opt_d):
+                        st.error("⚠️ А, B, C, D варианттары мен сұрақ міндетті түрде толтырылуы керек!")
+                    elif len(correct_selected) == 0:
+                        st.error("⚠️ Кемінде 1 дұрыс жауапты белгілеңіз!")
+                    elif len(correct_selected) > 3:
+                        st.error("⚠️ Дұрыс жауаптар саны 3-тен аспауы керек!")
+                    elif not has_extra_opts and len(correct_selected) > 1:
+                        st.error("⚠️ 4 вариантты тестіде тек 1 дұрыс жауап болуы тиіс!")
+                    else:
                         st.session_state.questions[selected_sub].append(
                             {
                                 "q": q_text,
@@ -243,11 +290,14 @@ else:
                                     "B": opt_b,
                                     "C": opt_c,
                                     "D": opt_d,
+                                    "E": opt_e,
+                                    "F": opt_f,
                                 },
-                                "correct": correct_opt,
+                                "correct": correct_selected,
+                                "image": img_url.strip(),
                             }
                         )
-                        st.success("Сұрақ қосылды!")
+                        st.success("✅ Сұрақ сәтті қосылды!")
 
         with z_tab2:
             new_st_u = st.text_input("Оқушы логині:")
@@ -262,7 +312,7 @@ else:
                     }
                     st.success("Оқушы қосылды!")
 
-    # --- ОҚУШЫ ТЕСТІ (ГРАФИК БАР) ---
+    # --- ОҚУШЫ ТЕСТІ (СУРЕТТЕР ВАРИАНТТАР БАР) ---
     if role == "student":
         subject = st.selectbox(
             "Пән таңдаңыз:", list(st.session_state.questions.keys())
@@ -273,19 +323,46 @@ else:
             user_answers = {}
             for i, q in enumerate(q_list):
                 st.write(f"**{i+1}. {q['q']}**")
+
+                # Сурет бар болса көрсету
+                if q.get("image"):
+                    st.image(q["image"], use_column_width=True)
+
                 opts = q["options"]
-                formatted_opts = [f"{k}) {v}" for k, v in opts.items()]
-                ans = st.radio(
-                    "Жауап:", formatted_opts, key=f"q_{subject}_{i}"
-                )
-                user_answers[i] = ans[0]
+                # Бос емес варианттарды таңдау
+                available_opts = {k: v for k, v in opts.items() if v.strip()}
+
+                # Егер 4 вариантты тест болса (1 дұрыс жауап) -> Radio button
+                if len(available_opts) <= 4 or len(q["correct"]) == 1:
+                    formatted_opts = [
+                        f"{k}) {v}" for k, v in available_opts.items()
+                    ]
+                    ans = st.radio(
+                        "Жауапты таңдаңыз:",
+                        formatted_opts,
+                        key=f"q_{subject}_{i}",
+                    )
+                    user_answers[i] = [ans[0]]
+                else:
+                    # Көп жауапты тест -> Checkboxes
+                    st.write("Көп жауапты тест (бірнешеуін таңдауға болады):")
+                    selected_list = []
+                    for k, v in available_opts.items():
+                        cb = st.checkbox(
+                            f"{k}) {v}", key=f"q_{subject}_{i}_{k}"
+                        )
+                        if cb:
+                            selected_list.append(k)
+                    user_answers[i] = selected_list
 
             if st.button("Тестті аяқтау"):
-                score = sum(
-                    1
-                    for i, q in enumerate(q_list)
-                    if user_answers.get(i) == q["correct"]
-                )
+                score = 0
+                for i, q in enumerate(q_list):
+                    u_ans = set(user_answers.get(i, []))
+                    c_ans = set(q["correct"])
+                    if u_ans == c_ans and len(u_ans) > 0:
+                        score += 1
+
                 wrong_score = len(q_list) - score
 
                 st.session_state.results.append(

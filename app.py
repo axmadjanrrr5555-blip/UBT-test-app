@@ -1,7 +1,6 @@
 from datetime import datetime
 import time
 import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
 
 st.set_page_config(page_title="KASUM AHMAD - TRADING TEST", layout="wide")
@@ -184,8 +183,11 @@ else:
     user_info = st.session_state.users[st.session_state.logged_user]
     role = user_info["role"]
     st.sidebar.markdown(f"📈 **Терминал:** `{st.session_state.logged_user}`")
-    st.sidebar.markdown(f"🏷️ **Статус:** `<span style='color:#00FF66'>{role.upper()}</span>`", unsafe_allow_html=True)
-    
+    st.sidebar.markdown(
+        f"🏷️ **Статус:** `<span style='color:#00FF66'>{role.upper()}</span>`",
+        unsafe_allow_html=True,
+    )
+
     if st.sidebar.button("Шығу / Logout"):
         st.session_state.logged_user = None
         st.rerun()
@@ -263,8 +265,10 @@ else:
                 selected_sub = st.selectbox(
                     "Пән таңдаңыз:", list(st.session_state.questions.keys())
                 )
-                q_text = st.text_input("Сұрақтың матні:")
-                img_url = st.text_input("🖼️ Сурет сілтемесі (URL, міндетті емес):")
+                q_text = st.text_input("Сұрақтың мәтіні:")
+                img_url = st.text_input(
+                    "🖼️ Сурет сілтемесі (URL, міндетті емес):"
+                )
 
                 st.write("Варианттар (A-F):")
                 c1, c2 = st.columns(2)
@@ -278,34 +282,58 @@ else:
                     opt_f = st.text_input("F жауабы (міндетті емес):")
 
                 st.write("Дұрыс жауаптар (макс 3):")
-                ca, cb, cc = st.checkbox("A"), st.checkbox("B"), st.checkbox("C")
-                cd, ce, cf = st.checkbox("D"), st.checkbox("E"), st.checkbox("F")
+                ca, cb, cc = (
+                    st.checkbox("A"),
+                    st.checkbox("B"),
+                    st.checkbox("C"),
+                )
+                cd, ce, cf = (
+                    st.checkbox("D"),
+                    st.checkbox("E"),
+                    st.checkbox("F"),
+                )
 
                 correct_selected = []
-                if ca: correct_selected.append("A")
-                if cb: correct_selected.append("B")
-                if cc: correct_selected.append("C")
-                if cd: correct_selected.append("D")
-                if ce: correct_selected.append("E")
-                if cf: correct_selected.append("F")
+                if ca:
+                    correct_selected.append("A")
+                if cb:
+                    correct_selected.append("B")
+                if cc:
+                    correct_selected.append("C")
+                if cd:
+                    correct_selected.append("D")
+                if ce:
+                    correct_selected.append("E")
+                if cf:
+                    correct_selected.append("F")
 
                 if st.button("Сұрақты Сақтау"):
                     has_extra = bool(opt_e.strip() or opt_f.strip())
                     if not q_text or not (opt_a and opt_b and opt_c and opt_d):
-                        st.error("⚠️ А, B, C, D варианттары мен сұрақ толтырылуы тиіс!")
+                        st.error(
+                            "⚠️ А, B, C, D варианттары мен сұрақ толтырылуы тиіс!"
+                        )
                     elif len(correct_selected) == 0:
                         st.error("⚠️ Кемінде 1 дұрыс жауап белгілеңіз!")
                     elif len(correct_selected) > 3:
-                        st.error("⚠️ 3-тен артық дұрыс жауап таңдауға болмайды!")
+                        st.error(
+                            "⚠️ 3-тен артық дұрыс жауап таңдауға болмайды!"
+                        )
                     elif not has_extra and len(correct_selected) > 1:
-                        st.error("⚠️ 4 вариантты тестіде тек 1 дұрыс жауап болуы керек!")
+                        st.error(
+                            "⚠️ 4 вариантты тестіде тек 1 дұрыс жауап болуы керек!"
+                        )
                     else:
                         st.session_state.questions[selected_sub].append(
                             {
                                 "q": q_text,
                                 "options": {
-                                    "A": opt_a, "B": opt_b, "C": opt_c,
-                                    "D": opt_d, "E": opt_e, "F": opt_f,
+                                    "A": opt_a,
+                                    "B": opt_b,
+                                    "C": opt_c,
+                                    "D": opt_d,
+                                    "E": opt_e,
+                                    "F": opt_f,
                                 },
                                 "correct": correct_selected,
                                 "image": img_url.strip(),
@@ -326,9 +354,11 @@ else:
                     }
                     st.success("Оқушы сәтті қосылды!")
 
-    # --- ОҚУШЫ ТЕСТІ ЖӘНЕ ТРЕЙДИНГ ГРАФИГІ ---
+    # --- ОҚУШЫ ТЕСТІ ЖӘНЕ ГРАФИК ---
     if role == "student":
-        subject = st.selectbox("Пән таңдаңыз:", list(st.session_state.questions.keys()))
+        subject = st.selectbox(
+            "Пән таңдаңыз:", list(st.session_state.questions.keys())
+        )
         q_list = st.session_state.questions[subject]
 
         if q_list:
@@ -343,7 +373,9 @@ else:
                 # 1 дұрыс жауап немесе 4 вариант -> Radio Button
                 if len(opts) <= 4 or len(q["correct"]) == 1:
                     formatted = [f"{k}) {v}" for k, v in opts.items()]
-                    ans = st.radio("Жауапты таңдаңыз:", formatted, key=f"q_{subject}_{i}")
+                    ans = st.radio(
+                        "Жауапты таңдаңыз:", formatted, key=f"q_{subject}_{i}"
+                    )
                     user_answers[i] = [ans[0]]
                 else:
                     st.write("Көп жауапты тест (бірнешеуін белгілеңіз):")
@@ -356,23 +388,25 @@ else:
             if st.button("🚀 Тестті Тапсыру (Trading Analysis)"):
                 score = 0
                 step_scores = []
-                
+
                 for i, q in enumerate(q_list):
                     u_ans = set(user_answers.get(i, []))
                     c_ans = set(q["correct"])
                     if u_ans == c_ans and len(u_ans) > 0:
                         score += 1
-                        step_scores.append(1)  # Дұрыс - жасыл тренд
+                        step_scores.append(1)  # Дұрыс
                     else:
-                        step_scores.append(-1) # Қате - қызыл тренд
+                        step_scores.append(-1)  # Қате
 
                 wrong_score = len(q_list) - score
-                st.session_state.results.append({
-                    "user": st.session_state.logged_user,
-                    "subject": subject,
-                    "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    "score": f"{score}/{len(q_list)}",
-                })
+                st.session_state.results.append(
+                    {
+                        "user": st.session_state.logged_user,
+                        "subject": subject,
+                        "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                        "score": f"{score}/{len(q_list)}",
+                    }
+                )
 
                 st.write("---")
                 col_m1, col_m2, col_m3 = st.columns(3)
@@ -380,8 +414,8 @@ else:
                 col_m2.metric("🟢 Дұрыс (Long)", f"{score}")
                 col_m3.metric("🔴 Қате (Short)", f"{wrong_score}")
 
-                # --- TRADING STYLE CANDLESTICK / AREA CHART ---
-                st.subheader("📈 Трейдингтік Динамика Графигі (Trading Chart)")
+                # --- TRADING STYLE LINE / BAR CHART (Native Streamlit) ---
+                st.subheader("📈 Трейдингтік Динамика Графигі")
 
                 cumulative_profit = [0]
                 curr = 0
@@ -389,37 +423,15 @@ else:
                     curr += s
                     cumulative_profit.append(curr)
 
-                # Trading Chart құрастыру (Plotly)
-                fig = go.Figure()
-
-                # Неонды график сызығы
-                fig.add_trace(go.Scatter(
-                    x=list(range(len(cumulative_profit))),
-                    y=cumulative_profit,
-                    mode='lines+markers',
-                    name='Балл Тренді',
-                    line=dict(color='#00FF66' if score >= wrong_score else '#FF3366', width=3),
-                    marker=dict(size=8, color='#00FF66' if score >= wrong_score else '#FF3366'),
-                    fill='tozeroy',
-                    fillcolor='rgba(0, 255, 102, 0.1)' if score >= wrong_score else 'rgba(255, 51, 102, 0.1)'
-                ))
-
-                # Свечалар / Дұрыс-Қате индикаторлары
-                fig.add_trace(go.Bar(
-                    x=list(range(1, len(step_scores) + 1)),
-                    y=[1 if x == 1 else -1 for x in step_scores],
-                    marker_color=['#00FF66' if x == 1 else '#FF3366' for x in step_scores],
-                    name='Сұрақ нәтижесі'
-                ))
-
-                fig.update_layout(
-                    template="plotly_dark",
-                    paper_bgcolor="#0b0e14",
-                    plot_bgcolor="#131722",
-                    title="Сұрақтар бойынша трендтік талдау (TradingView Style)",
-                    xaxis=dict(title="Сұрақ номері", showgrid=True, gridcolor='#1e222d'),
-                    yaxis=dict(title="Профит / Балл", showgrid=True, gridcolor='#1e222d'),
-                    font=dict(color="#D1D4DC")
+                chart_df = pd.DataFrame(
+                    {"Тренд сұрақтар бойынша": cumulative_profit}
                 )
+                st.line_chart(chart_df)
 
-                st.plotly_chart(fig, use_container_width=True)
+                bar_df = pd.DataFrame(
+                    {
+                        "Көрсеткіш": ["Дұрыс (Long)", "Қате (Short)"],
+                        "Саны": [score, wrong_score],
+                    }
+                ).set_index("Көрсеткіш")
+                st.bar_chart(bar_df)

@@ -1,707 +1,413 @@
-from datetime import datetime
-import time
-import pandas as pd
-import streamlit as st
-
-st.set_page_config(
-    page_title="ONLINE TEST SYSTEM", layout="wide", page_icon="📜"
-)
-
-# TRADINGVIEW / BINANCE DARK STYLE CSS
-st.markdown(
-    """
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Қасым Ахмад</title>
     <style>
-    .stApp {
-        background-color: #0b0e14 !important;
-        background-image: radial-gradient(circle at 50% 20%, #131722 0%, #0b0e14 100%);
-        font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
-    }
-    
-    .main-title {
-        font-size: 60px;
-        font-weight: 900;
-        letter-spacing: 4px;
-        color: #00FF66 !important;
-        margin-bottom: 0px;
-        line-height: 1;
-        text-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
-    }
-    
-    .sub-title {
-        font-size: 60px;
-        font-weight: 900;
-        letter-spacing: 4px;
-        color: #00FF66 !important;
-        text-align: right;
-        margin-top: 0px;
-        line-height: 1;
-        text-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    .welcome-text {
-        font-size: 26px !important;
-        font-weight: bold !important;
-        color: #00FF66 !important;
-        background: #131722;
-        padding: 12px 20px;
-        border-radius: 8px;
-        border-left: 5px solid #00FF66;
-        margin-bottom: 20px;
-        box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
-    }
+        body {
+            background-color: #121824;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    h1, h2, h3, h4, h5, h6, p, label, div, span, small, li { 
-        color: #D1D4DC !important; 
-        font-weight: 600 !important;
-    }
-    
-    div[data-testid="stMetricValue"] {
-        color: #00FF66 !important;
-        font-size: 32px !important;
-        font-weight: bold;
-    }
+        /* Header / Заголовок */
+        header {
+            width: 100%;
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-bottom: 2px solid #3b82f6;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
 
-    .stButton>button { 
-        background: linear-gradient(135deg, #1e222d 0%, #2a2e39 100%) !important; 
-        color: #00FF66 !important; 
-        border: 1.5px solid #00FF66 !important; 
-        border-radius: 6px;
-        font-size: 16px !important;
-        font-weight: bold !important;
-        transition: all 0.3s ease;
-        box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
-    }
-    
-    .stButton>button:hover {
-        background: #00FF66 !important;
-        color: #0b0e14 !important;
-        box-shadow: 0 0 20px rgba(0, 255, 102, 0.8);
-    }
+        header h1 {
+            font-size: 2.8rem;
+            letter-spacing: 3px;
+            color: #60a5fa;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+        }
 
-    .stTextInput>div>div>input, .stSelectbox>div>div {
-        color: #00FF66 !important;
-        background-color: #1e222d !important;
-        border: 1px solid #2a2e39 !important;
-        border-radius: 6px;
-    }
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: 40px auto;
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
 
-    .stTabs [data-baseweb="tab-list"] {
-        background-color: #131722;
-        border-radius: 8px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        color: #848e9c !important;
-    }
-    .stTabs [aria-selected="true"] {
-        color: #00FF66 !important;
-        border-bottom: 2px solid #00FF66 !important;
-    }
+        /* Формалар мен кіру бөлімі */
+        .login-box, .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-    /* СЕРТИФИКАТ СТИЛІ */
-    .certificate-box {
-        border: 10px solid #00FF66;
-        padding: 40px;
-        background: #131722;
-        border-radius: 15px;
-        text-align: center;
-        box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-    .cert-title {
-        font-size: 45px !important;
-        font-weight: 900 !important;
-        color: #00FF66 !important;
-        letter-spacing: 4px;
-        text-transform: uppercase;
-        margin-bottom: 10px;
-    }
-    .cert-academy {
-        font-size: 22px !important;
-        font-weight: bold !important;
-        color: #848e9c !important;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        margin-bottom: 25px;
-    }
-    .cert-name {
-        font-size: 42px !important;
-        font-weight: 900 !important;
-        color: #FFFFFF !important;
-        border-bottom: 3px solid #00FF66;
-        display: inline-block;
-        padding-bottom: 8px;
-        margin: 20px 0;
-        letter-spacing: 2px;
-    }
-    .cert-body {
-        font-size: 22px !important;
-        color: #D1D4DC !important;
-        margin: 12px 0;
-    }
-    .cert-score {
-        font-size: 45px !important;
-        font-weight: bold !important;
-        color: #00FF66 !important;
-        margin: 10px 0;
-    }
-    .cert-rank {
-        font-size: 26px !important;
-        font-weight: bold !important;
-        color: #FFD700 !important;
-        background: #1e222d;
-        display: inline-block;
-        padding: 10px 25px;
-        border-radius: 8px;
-        border: 1.5px solid #FFD700;
-        margin: 18px 0;
-    }
-    .cert-footer {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 40px;
-        padding-top: 20px;
-        border-top: 1px dashed #2a2e39;
-    }
+        h2 {
+            color: #93c5fd;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 10px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input[type="text"], input[type="password"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #3b82f6;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .logout-btn {
+            background-color: #dc2626;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background-color: #b91c1c;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            background-color: #3b82f6;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .limit-info {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 20px;
+        }
+
+        .question-card {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #334155;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-item input[type="text"] {
+            flex: 1;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
-""",
-    unsafe_allow_html=True,
-)
+</head>
+<body>
 
-st.markdown(
-    '<div class="main-title">ONLINE TEST</div>', unsafe_allow_html=True
-)
-st.markdown('<div class="sub-title">PORTAL</div>', unsafe_allow_html=True)
-st.write("---")
+    <header>
+        <h1>Қасым Ахмад</h1>
+    </header>
 
-# Session State баптаулары
-if "users" not in st.session_state:
-    st.session_state.users = {
-        "director": {
-            "name": "Қасым Ахмад (Директор)",
-            "pass": "dir123",
-            "role": "director",
-            "fails": 0,
-            "ban_until": 0,
-            "attempts": 9999,
-        },
-        "zam": {
-            "name": "Зам Директор",
-            "pass": "zam123",
-            "role": "zam",
-            "fails": 0,
-            "ban_until": 0,
-            "attempts": 9999,
-        },
-    }
+    <div class="container">
+        <!-- АВТОРИЗАЦИЯ (ЖҮЙЕГЕ КІРУ) -->
+        <div id="loginSection" class="login-box">
+            <h2>🔑 Жүйеге кіру[span_1](start_span)[span_1](end_span)</h2>
+            <div>
+                <label>Логин:</label>
+                <input type="text" id="username" placeholder="Логинді енгізіңіз (director немесе zam)">
+            </div>
+            <div>
+                <label>Пароль:</label>
+                <input type="password" id="password" placeholder="Парольді енгізіңіз (123)">
+            </div>
+            <button onclick="login()">Кіру</button>
+            <p style="color: #94a3b8; font-size: 0.9rem;">
+                * Демо кіру: <br>
+                Директор: логин <b>director</b> / пароль <b>123</b> <br>
+                Зам: логин <b>zam</b> / пароль <b>123</b>
+            </p>
+        </div>
 
-if "questions" not in st.session_state:
-    st.session_state.questions = {
-        "Математика": [
-            {
-                "q": "2 + 2 = ?",
-                "options": {
-                    "A": "3",
-                    "B": "4",
-                    "C": "5",
-                    "D": "6",
-                    "E": "",
-                    "F": "",
-                },
-                "correct": ["B"],
-                "image": "",
-            }
-        ],
-        "Қазақстан тарихы": [],
-        "Оқу сауаттылығы": [],
-    }
-
-if "login_logs" not in st.session_state:
-    st.session_state.login_logs = []
-
-if "can_zam_add_q" not in st.session_state:
-    st.session_state.can_zam_add_q = True
-
-if "results" not in st.session_state:
-    st.session_state.results = []
-
-if "logged_user" not in st.session_state:
-    st.session_state.logged_user = None
-
-if "last_cert" not in st.session_state:
-    st.session_state.last_cert = None
-
-curr_time = time.time()
-
-# --- КІРУ БӨЛІМІ ---
-if not st.session_state.logged_user:
-    st.subheader("🔑 Жүйеге Кіру")
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        login = st.text_input("Логин:")
-        password = st.text_input("Пароль:", type="password")
-
-        if st.button("Кіру / Login"):
-            if login in st.session_state.users:
-                usr = st.session_state.users[login]
-                if usr["ban_until"] > curr_time:
-                    left = int((usr["ban_until"] - curr_time) // 60)
-                    st.error(f"⛔ Блокталғансыз! {left} мин қалды.")
-                elif usr["pass"] == password:
-                    if usr["role"] == "student" and usr.get("attempts", 0) <= 0:
-                        st.error(
-                            "⛔ Сізде тест тапсыруға доступ жоқ! Директор немесе Зам-нан рұқсат сұраңыз."
-                        )
-                    else:
-                        usr["fails"] = 0
-                        st.session_state.logged_user = login
-                        st.session_state.last_cert = None
-                        login_time = datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        )
-                        st.session_state.login_logs.append(
-                            {
-                                "user": usr.get("name", login),
-                                "username": login,
-                                "time": login_time,
-                                "role": usr["role"],
-                            }
-                        )
-                        st.rerun()
-                else:
-                    usr["fails"] += 1
-                    if usr["fails"] >= 5:
-                        usr["ban_until"] = curr_time + 1800
-                        st.error("⛔ 5 рет қате кірілді! 30 мин БАН.")
-                    else:
-                        st.error(
-                            f"❌ Қате пароль! Қалған мүмкіндік: {5 - usr['fails']}"
-                        )
-            else:
-                st.error("❌ Мұндай қолданушы тіркелмеген!")
-
-else:
-    user_info = st.session_state.users[st.session_state.logged_user]
-    role = user_info["role"]
-    full_name = user_info.get("name", st.session_state.logged_user)
-
-    st.markdown(
-        f'<div class="welcome-text">👋 Welcome, {full_name}!</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.sidebar.markdown(f"📈 **Аты-жөні:** `{full_name}`")
-    st.sidebar.markdown(f"👤 **Логин:** `{st.session_state.logged_user}`")
-    st.sidebar.markdown(
-        f"🏷️ **Статус:** `<span style='color:#00FF66'>{role.upper()}</span>`",
-        unsafe_allow_html=True,
-    )
-
-    if role == "student":
-        st.sidebar.markdown(
-            f"🔑 **Қалған доступ:** `{user_info.get('attempts', 0)}`"
-        )
-
-    if st.sidebar.button("Шығу / Logout"):
-        st.session_state.logged_user = None
-        st.session_state.last_cert = None
-        st.rerun()
-
-    # --- ДИРЕКТОР ПАНЕЛІ ---
-    if role == "director":
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-            [
-                "📊 Оқушылар Графигі",
-                "🔑 Доступ/Мүмкіндік Беру",
-                "🖥️ Кіру Тарихы",
-                "📋 Тест Нәтижелері",
-                "🔓 Банды Шешу",
-                "🔐 Доступ Реттеу",
-            ]
-        )
-
-        with tab1:
-            st.subheader("📈 Оқушылардың графиктерін қарау")
-            if not st.session_state.results:
-                st.info("ℹ️ Әлі ешқандай оқушы тест тапсырмады.")
-            else:
-                student_list = list(
-                    set(r["user_name"] for r in st.session_state.results)
-                )
-                selected_student = st.selectbox(
-                    "Оқушыны таңдаңыз:", student_list
-                )
-
-                student_results = [
-                    r
-                    for r in st.session_state.results
-                    if r["user_name"] == selected_student
-                ]
-
-                st.write(
-                    f"**{selected_student}** оқушысының тапсырған тесттері ({len(student_results)} рет):"
-                )
-
-                for idx, res in enumerate(reversed(student_results)):
-                    st.markdown(
-                        f"--- \n 🕒 **Уақыты:** {res['time']} | 📚 **Пән:** {res['subject']} | 🎯 **Балл:** `{res['score']}`"
-                    )
-
-                    cumulative_profit = [0]
-                    curr = 0
-                    for s in res["step_scores"]:
-                        curr += s
-                        cumulative_profit.append(curr)
-
-                    st.line_chart(
-                        pd.DataFrame({"Балл тренді": cumulative_profit})
-                    )
-
-        with tab2:
-            st.subheader("🔑 Оқушыларға тест тапсыруға доступ беру")
-            students = {
-                k: v
-                for k, v in st.session_state.users.items()
-                if v["role"] == "student"
-            }
-            if not students:
-                st.info("Тіркелген оқушылар жоқ.")
-            else:
-                st_target = st.selectbox(
-                    "Оқушыны таңдаңыз:",
-                    options=list(students.keys()),
-                    format_func=lambda x: f"{students[x].get('name', x)} ({x})",
-                )
-                st.write(
-                    f"Қазіргі қолжетімді тапсыру мүмкіндігі: **{st.session_state.users[st_target].get('attempts', 0)}** рет."
-                )
-
-                col_a, col_b, col_c = st.columns(3)
-                if col_a.button("+1 Доступ беру"):
-                    st.session_state.users[st_target]["attempts"] = (
-                        st.session_state.users[st_target].get("attempts", 0) + 1
-                    )
-                    st.success(f"+1 доступ берілді!")
-                    st.rerun()
-
-                if col_b.button("+2 Доступ беру"):
-                    st.session_state.users[st_target]["attempts"] = (
-                        st.session_state.users[st_target].get("attempts", 0) + 2
-                    )
-                    st.success(f"+2 доступ берілді!")
-                    st.rerun()
-
-                if col_c.button("+3 Доступ беру"):
-                    st.session_state.users[st_target]["attempts"] = (
-                        st.session_state.users[st_target].get("attempts", 0) + 3
-                    )
-                    st.success(f"+3 доступ берілді!")
-                    st.rerun()
-
-        with tab3:
-            for log in reversed(st.session_state.login_logs):
-                st.write(
-                    f"⏱️ `{log['time']}` | 👤 User: **{log['user']}** (`{log['username']}`) - {log['role']}"
-                )
-
-        with tab4:
-            for r in st.session_state.results:
-                st.write(
-                    f"📈 **{r['user_name']}** | 📚 {r['subject']} | 🕒 {r['time']} | 🎯 Балл: `{r['score']}`"
-                )
-
-        with tab5:
-            for u_name, u_data in st.session_state.users.items():
-                if u_data["ban_until"] > curr_time:
-                    if st.button(
-                        f"Unban: {u_data.get('name', u_name)} ({u_name})"
-                    ):
-                        u_data["ban_until"] = 0
-                        u_data["fails"] = 0
-                        st.success("Баннан шығарылды!")
-                        st.rerun()
-
-        with tab6:
-            allow_zam = st.checkbox(
-                "Зам директорға сұрақ қосуға рұқсат",
-                value=st.session_state.can_zam_add_q,
-            )
-            st.session_state.can_zam_add_q = allow_zam
-
-            dir_new_name = st.text_input(
-                "Директордың Аты-Жөні:",
-                value=st.session_state.users["director"].get("name", ""),
-            )
-            new_dir_p = st.text_input(
-                "Жаңа Директор паролі:", type="password", key="np_dir"
-            )
-            if st.button("Директор деректерін жаңарту"):
-                st.session_state.users["director"]["name"] = dir_new_name
-                if new_dir_p.strip():
-                    st.session_state.users["director"]["pass"] = (
-                        new_dir_p.strip()
-                    )
-                st.success("Деректер сақталды!")
-                st.rerun()
-
-            zam_new_name = st.text_input(
-                "Замның Аты-Жөні:",
-                value=st.session_state.users["zam"].get("name", ""),
-            )
-            new_zam_p = st.text_input(
-                "Жаңа Зам паролі:", type="password", key="np_zam"
-            )
-            if st.button("Зам деректерін жаңарту"):
-                st.session_state.users["zam"]["name"] = zam_new_name
-                if new_zam_p.strip():
-                    st.session_state.users["zam"]["pass"] = new_zam_p.strip()
-                st.success("Деректер сақталды!")
-                st.rerun()
-
-    # --- СҰРАҚ ҚОСУ ЖӘНЕ ОҚУШЫҒА ДОСТУП БЕРУ (ЗАМ/ДИРЕКТОР) ---
-    if role in ["director", "zam"]:
-        st.subheader("⚙️ Сұрақтар мен Оқушыларды басқару")
-        z_tab1, z_tab2 = st.tabs(["📝 Сұрақ Құрастыру", "👤 Оқушы Тіркеу / Доступ"])
-
-        with z_tab1:
-            if role == "zam" and not st.session_state.can_zam_add_q:
-                st.error("⛔ Сұрақ қосуға доступ жабық!")
-            else:
-                selected_sub = st.selectbox(
-                    "Пән таңдаңыз:", list(st.session_state.questions.keys())
-                )
-                q_text = st.text_input("Сұрақтың мәтіні:")
-                img_url = st.text_input(
-                    "🖼️ Сурет сілтемесі (URL, міндетті емес):"
-                )
-
-                st.write("Варианттар (A-F):")
-                c1, c2 = st.columns(2)
-                with c1:
-                    opt_a = st.text_input("A жауабы:")
-                    opt_b = st.text_input("B жауабы:")
-                    opt_c = st.text_input("C жауабы:")
-                with c2:
-                    opt_d = st.text_input("D жауабы:")
-                    opt_e = st.text_input("E жауабы (міндетті емес):")
-                    opt_f = st.text_input("F жауабы (міндетті емес):")
-
-                st.write("Дұрыс жауаптар (макс 3):")
-                ca, cb, cc = (
-                    st.checkbox("A"),
-                    st.checkbox("B"),
-                    st.checkbox("C"),
-                )
-                cd, ce, cf = (
-                    st.checkbox("D"),
-                    st.checkbox("E"),
-                    st.checkbox("F"),
-                )
-
-                correct_selected = []
-                if ca:
-                    correct_selected.append("A")
-                if cb:
-                    correct_selected.append("B")
-                if cc:
-                    correct_selected.append("C")
-                if cd:
-                    correct_selected.append("D")
-                if ce:
-                    correct_selected.append("E")
-                if cf:
-                    correct_selected.append("F")
-
-                if st.button("Сұрақты Сақтау"):
-                    has_extra = bool(opt_e.strip() or opt_f.strip())
-                    if not q_text or not (opt_a and opt_b and opt_c and opt_d):
-                        st.error(
-                            "⚠️ А, B, C, D варианттары мен сұрақ толтырылуы тиіс!"
-                        )
-                    elif len(correct_selected) == 0:
-                        st.error("⚠️ Кемінде 1 дұрыс жауап белгілеңіз!")
-                    elif len(correct_selected) > 3:
-                        st.error(
-                            "⚠️ 3-тен артық дұрыс жауап таңдауға болмайды!"
-                        )
-                    elif not has_extra and len(correct_selected) > 1:
-                        st.error(
-                            "⚠️ 4 вариантты тестіде тек 1 дұрыс жауап болуы керек!"
-                        )
-                    else:
-                        st.session_state.questions[selected_sub].append(
-                            {
-                                "q": q_text,
-                                "options": {
-                                    "A": opt_a,
-                                    "B": opt_b,
-                                    "C": opt_c,
-                                    "D": opt_d,
-                                    "E": opt_e,
-                                    "F": opt_f,
-                                },
-                                "correct": correct_selected,
-                                "image": img_url.strip(),
-                            }
-                        )
-                        st.success("✅ Сұрақ сақталды!")
-
-        with z_tab2:
-            st_fullname = st.text_input("Оқушының Толық Аты-Жөні:")
-            new_st_u = st.text_input("Оқушы логині:")
-            new_st_p = st.text_input("Оқушы паролі:")
-            init_attempts = st.number_input(
-                "Бастапқы доступ саны:", min_value=1, max_value=10, value=1
-            )
-            if st.button("Оқушыны Тіркеу"):
-                if new_st_u and new_st_p and st_fullname:
-                    st.session_state.users[new_st_u] = {
-                        "name": st_fullname,
-                        "pass": new_st_p,
-                        "role": "student",
-                        "fails": 0,
-                        "ban_until": 0,
-                        "attempts": init_attempts,
-                    }
-                    st.success("Оқушы сәтті қосылды!")
-                else:
-                    st.error("⚠️ Барлық өрістерді толтырыңыз!")
-
-    # --- ОҚУШЫ ТЕСТІ ЖӘНЕ СЕРТИФИКАТ ---
-    if role == "student":
-        if st.session_state.last_cert:
-            cert = st.session_state.last_cert
-
-            # Сертификат: "KASUM AHMAD TEST ACADEMY" деп өзгертілді
-            st.markdown(
-                f"""
-            <div class="certificate-box">
-                <div class="cert-title">🏆 CERTIFICATE OF ACHIEVEMENT 🏆</div>
-                <div class="cert-academy">KASUM AHMAD TEST ACADEMY</div>
-                <p class="cert-body">Осы сертификат табысты түрде тест тапсырған оқушыға беріледі:</p>
-                <div class="cert-name">{cert['user_fullname']}</div>
-                <br>
-                <p class="cert-body">Пән: <b>{cert['subject']}</b></p>
-                <div class="cert-score">{cert['score']}</div>
-                <p class="cert-body">Жалпы нәтиже: <b>{cert['percentage']}%</b></p>
-                <div class="cert-rank">🥇 Рейтингтегі орны: {cert['rank']}-орын (Жалпы {cert['total_students']} оқушының ішінен)</div>
-                <div class="cert-footer">
-                    <div>📅 Күні: {cert['date']}</div>
-                    <div>✍️ Тексерілді</div>
+        <!-- ДИРЕКТОР КАБИНЕТІ -->
+        <div id="directorDashboard" class="dashboard hidden">
+            <h2>👨‍💼 Директор кабинеті <span class="badge">Басқарушы</span></h2>
+            
+            <!-- Лимит орнату -->
+            <div class="limit-info">
+                <h3>Сұрақтар лимитін орнату</h3>
+                <p>Қазiргi жалпы лимит: <b id="currentLimitText">10</b> сұрақ</p>
+                <p>Қосылған сұрақтар саны: <b id="addedCountText">0</b></p>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="number" id="newLimitInput" placeholder="Жаңа лимит енгізіңіз" style="width: 200px;">
+                    <button onclick="updateLimit()">Лимитті сақтау</button>
                 </div>
             </div>
-            """,
-                unsafe_allow_html=True,
-            )
 
-            col_btn1, col_btn2 = st.columns([1, 1])
-            with col_btn1:
-                st.info("ℹ️ Нәтиже жүйеге сақталды.")
-            with col_btn2:
-                if st.button("🚪 Жүйеден шығу (Logout)"):
-                    st.session_state.logged_user = None
-                    st.session_state.last_cert = None
-                    st.rerun()
+            <!-- Сұрақ құрастыру (Бір дұрыс жауапты) -->
+            <h3>➕ Жаңа сұрақ қосу (Тек бір дұрыс жауапты)</h3>
+            <div>
+                <label>Сұрақ мәтіні:</label>
+                <textarea id="singleQText" rows="3" placeholder="Сұрақты жазыңыз..."></textarea>
+            </div>
+            <div class="options-group">
+                <label>Варианттар (Дұрыс жауапты белгілеңіз):</label>
+                <div class="option-item"><input type="radio" name="singleCorrect" value="0" checked> <input type="text" class="single-opt" placeholder="А варианты"></div>
+                <div class="option-item"><input type="radio" name="singleCorrect" value="1"> <input type="text" class="single-opt" placeholder="B варианты"></div>
+                <div class="option-item"><input type="radio" name="singleCorrect" value="2"> <input type="text" class="single-opt" placeholder="C варианты"></div>
+                <div class="option-item"><input type="radio" name="singleCorrect" value="3"> <input type="text" class="single-opt" placeholder="D варианты"></div>
+            </div>
+            <button onclick="addSingleQuestion()" style="margin-top: 15px;">Сұрақты сақтау</button>
 
-        else:
-            subject = st.selectbox(
-                "Пән таңдаңыз:", list(st.session_state.questions.keys())
-            )
-            q_list = st.session_state.questions[subject]
+            <button class="logout-btn" onclick="logout()">Шығу</button>
+        </div>
 
-            if q_list:
-                user_answers = {}
-                for i, q in enumerate(q_list):
-                    st.markdown(f"#### ❓ {i+1}-сұрақ: {q['q']}")
-                    if q.get("image"):
-                        st.image(q["image"], use_column_width=True)
+        <!-- ЗАМ (ОРЫНБАСАР) КАБИНЕТІ -->
+        <div id="zamDashboard" class="dashboard hidden">
+            <h2>🧑‍💼 Зам (Орынбасар) кабинеті <span class="badge" style="background:#10b981;">Редактор</span></h2>
+            
+            <div class="limit-info">
+                <h3>Директор белгілеген лимит</h3>
+                <p>Рұқсат етілген сұрақ саны: <b id="zamLimitText">10</b></p>
+                <p>Қазіргі қосылған сұрақтар: <b id="zamAddedCountText">0</b></p>
+            </div>
 
-                    opts = {k: v for k, v in q["options"].items() if v.strip()}
+            <!-- Сұрақ құрастыру (Бірнеше дұрыс жауапты) -->
+            <h3>➕ Жаңа сұрақ қосу (Бірнеше дұрыс жауабы бар)</h3>
+            <div>
+                <label>Сұрақ мәтіні:</label>
+                <textarea id="multiQText" rows="3" placeholder="Сұрақты жазыңыз..."></textarea>
+            </div>
+            <div class="options-group">
+                <label>Варианттар (Дұрыс жауаптарды чекбокспен белгілеңіз):</label>
+                <div class="option-item"><input type="checkbox" class="multi-correct" value="0"> <input type="text" class="multi-opt" placeholder="А варианты"></div>
+                <div class="option-item"><input type="checkbox" class="multi-correct" value="1"> <input type="text" class="multi-opt" placeholder="B варианты"></div>
+                <div class="option-item"><input type="checkbox" class="multi-correct" value="2"> <input type="text" class="multi-opt" placeholder="C варианты"></div>
+                <div class="option-item"><input type="checkbox" class="multi-correct" value="3"> <input type="text" class="multi-opt" placeholder="D варианты"></div>
+            </div>
+            <button onclick="addMultiQuestion()" style="margin-top: 15px; background-color: #059669;">Сұрақты сақтау</button>
 
-                    if len(opts) <= 4 or len(q["correct"]) == 1:
-                        formatted = [f"{k}) {v}" for k, v in opts.items()]
-                        ans = st.radio(
-                            "Жауапты таңдаңыз:",
-                            formatted,
-                            key=f"q_{subject}_{i}",
-                        )
-                        user_answers[i] = [ans[0]]
-                    else:
-                        st.write("Көп жауапты тест (бірнешеуін белгілеңіз):")
-                        selected = []
-                        for k, v in opts.items():
-                            if st.checkbox(
-                                f"{k}) {v}", key=f"q_{subject}_{i}_{k}"
-                            ):
-                                selected.append(k)
-                        user_answers[i] = selected
+            <button class="logout-btn" onclick="logout()">Шығу</button>
+        </div>
 
-                if st.button("🚀 Тестті Аяқтау және Сертификат Алу"):
-                    score = 0
-                    step_scores = []
+        <!-- ҚОСЫЛҒАН СҰРАҚТАР ТІЗІМІ -->
+        <div id="questionsListSection" class="dashboard hidden" style="margin-top: 20px;">
+            <h2>📋 Қосылған сұрақтар тізімі</h2>
+            <div id="questionsContainer"></div>
+        </div>
+    </div>
 
-                    for i, q in enumerate(q_list):
-                        u_ans = set(user_answers.get(i, []))
-                        c_ans = set(q["correct"])
-                        if u_ans == c_ans and len(u_ans) > 0:
-                            score += 1
-                            step_scores.append(1)
-                        else:
-                            step_scores.append(-1)
+    <script>
+        // Деректерді сақтау
+        let questionLimit = 10;
+        let questions = [];
 
-                    total_q = len(q_list)
-                    percentage = round((score / total_q) * 100, 1)
-                    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+        function updateUI() {
+            document.getElementById('currentLimitText').innerText = questionLimit;
+            document.getElementById('zamLimitText').innerText = questionLimit;
+            document.getElementById('addedCountText').innerText = questions.length;
+            document.getElementById('zamAddedCountText').innerText = questions.length;
 
-                    st.session_state.results.append(
-                        {
-                            "user": st.session_state.logged_user,
-                            "user_name": full_name,
-                            "subject": subject,
-                            "time": now_str,
-                            "score": f"{score}/{total_q}",
-                            "raw_score": score,
-                            "step_scores": step_scores,
-                        }
-                    )
+            renderQuestions();
+        }
 
-                    sub_results = [
-                        r
-                        for r in st.session_state.results
-                        if r["subject"] == subject
-                    ]
-                    best_scores = {}
-                    for r in sub_results:
-                        u = r["user"]
-                        if (
-                            u not in best_scores
-                            or r["raw_score"] > best_scores[u]
-                        ):
-                            best_scores[u] = r["raw_score"]
+        // Жүйеге кіру
+        function login() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
 
-                    sorted_rank = sorted(
-                        best_scores.items(), key=lambda x: x[1], reverse=True
-                    )
-                    rank = 1
-                    for idx, (u, sc) in enumerate(sorted_rank):
-                        if u == st.session_state.logged_user:
-                            rank = idx + 1
-                            break
+            if (user === 'director' && pass === '123') {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('directorDashboard').classList.remove('hidden');
+                document.getElementById('questionsListSection').classList.remove('hidden');
+            } else if (user === 'zam' && pass === '123') {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('zamDashboard').classList.remove('hidden');
+                document.getElementById('questionsListSection').classList.remove('hidden');
+            } else {
+                alert('Логин немесе пароль қате!');
+            }
+            updateUI();
+        }
 
-                    total_students = len(best_scores)
+        // Шығу
+        function logout() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('directorDashboard').classList.add('hidden');
+            document.getElementById('zamDashboard').classList.add('hidden');
+            document.getElementById('questionsListSection').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
 
-                    st.session_state.users[st.session_state.logged_user][
-                        "attempts"
-                    ] -= 1
+        // Директор лимитті өзгерту
+        function updateLimit() {
+            const val = parseInt(document.getElementById('newLimitInput').value);
+            if (val && val > 0) {
+                questionLimit = val;
+                alert('Сұрақтар лимиті сақталды: ' + questionLimit);
+                updateUI();
+            } else {
+                alert('Оң сан енгізіңіз!');
+            }
+        }
 
-                    st.session_state.last_cert = {
-                        "user_fullname": full_name,
-                        "subject": subject,
-                        "score": f"{score} / {total_q}",
-                        "percentage": percentage,
-                        "rank": rank,
-                        "total_students": total_students,
-                        "date": now_str,
-                    }
+        // Директор: Бір жауапты сұрақ қосу
+        function addSingleQuestion() {
+            if (questions.length >= questionLimit) {
+                alert('Лимит толды! Басқа сұрақ қоса алмайсыз.');
+                return;
+            }
 
-                    st.rerun()
+            const qText = document.getElementById('singleQText').value.trim();
+            const opts = Array.from(document.querySelectorAll('.single-opt')).map(i => i.value.trim());
+            const correctRadio = document.querySelector('input[name="singleCorrect"]:checked');
+
+            if (!qText || opts.some(o => o === '')) {
+                alert('Барлық өрістерді толтырыңыз!');
+                return;
+            }
+
+            questions.push({
+                type: 'single',
+                author: 'Директор',
+                question: qText,
+                options: opts,
+                correct: [parseInt(correctRadio.value)]
+            });
+
+            alert('Сұрақ сәтті қосылды!');
+            document.getElementById('singleQText').value = '';
+            document.querySelectorAll('.single-opt').forEach(i => i.value = '');
+            updateUI();
+        }
+
+        // Зам: Бірнеше жауапты сұрақ қосу
+        function addMultiQuestion() {
+            if (questions.length >= questionLimit) {
+                alert('Директор белгілеген лимит толды! Сұрақ қосылмайды.');
+                return;
+            }
+
+            const qText = document.getElementById('multiQText').value.trim();
+            const opts = Array.from(document.querySelectorAll('.multi-opt')).map(i => i.value.trim());
+            const correctBoxes = Array.from(document.querySelectorAll('.multi-correct:checked')).map(c => parseInt(c.value));
+
+            if (!qText || opts.some(o => o === '')) {
+                alert('Барлық өрістерді толтырыңыз!');
+                return;
+            }
+
+            if (correctBoxes.length === 0) {
+                alert('Кем дегенде бір дұрыс жауапты белгілеңіз!');
+                return;
+            }
+
+            questions.push({
+                type: 'multi',
+                author: 'Орынбасар (Зам)',
+                question: qText,
+                options: opts,
+                correct: correctBoxes
+            });
+
+            alert('Сұрақ сәтті қосылды!');
+            document.getElementById('multiQText').value = '';
+            document.querySelectorAll('.multi-opt').forEach(i => i.value = '');
+            document.querySelectorAll('.multi-correct').forEach(c => c.checked = false);
+            updateUI();
+        }
+
+        // Сұрақтарды экранға шығару
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            if (questions.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8;">Әлі ешқандай сұрақ қосылмаған.</p>';
+                return;
+            }
+
+            questions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                
+                let optionsHTML = '';
+                q.options.forEach((opt, oIdx) => {
+                    const isCorrect = q.correct.includes(oIdx) ? ' (Дұрыс)' : '';
+                    const style = q.correct.includes(oIdx) ? 'color: #4ade80; font-weight: bold;' : '';
+                    optionsHTML += `<li style="${style}">${opt}${isCorrect}</li>`;
+                });
+
+                card.innerHTML = `
+                    <h4>${idx + 1}. ${q.question} <span style="font-size: 0.8rem; color: #94a3b8;">(${q.author} - ${q.type === 'single' ? 'Бір жауапты' : 'Көп жауапты'})</span></h4>
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        ${optionsHTML}
+                    </ul>
+                `;
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>

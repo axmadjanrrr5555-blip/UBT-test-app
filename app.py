@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(
-    page_title="KASUM AHMAD - TRADING TEST", layout="wide", page_icon="📜"
+    page_title="ONLINE TEST SYSTEM", layout="wide", page_icon="📜"
 )
 
 # TRADINGVIEW / BINANCE DARK STYLE CSS
@@ -18,9 +18,9 @@ st.markdown(
     }
     
     .main-title {
-        font-size: 70px;
+        font-size: 60px;
         font-weight: 900;
-        letter-spacing: 6px;
+        letter-spacing: 4px;
         color: #00FF66 !important;
         margin-bottom: 0px;
         line-height: 1;
@@ -28,14 +28,26 @@ st.markdown(
     }
     
     .sub-title {
-        font-size: 70px;
+        font-size: 60px;
         font-weight: 900;
-        letter-spacing: 6px;
+        letter-spacing: 4px;
         color: #00FF66 !important;
         text-align: right;
         margin-top: 0px;
         line-height: 1;
         text-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
+    }
+
+    .welcome-text {
+        font-size: 26px !important;
+        font-weight: bold !important;
+        color: #00FF66 !important;
+        background: #131722;
+        padding: 12px 20px;
+        border-radius: 8px;
+        border-left: 5px solid #00FF66;
+        margin-bottom: 20px;
+        box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
     }
 
     h1, h2, h3, h4, h5, h6, p, label, div, span, small, li { 
@@ -96,37 +108,53 @@ st.markdown(
         margin-top: 20px;
         margin-bottom: 20px;
     }
-    .cert-header {
+    .cert-title {
         font-size: 45px !important;
         font-weight: 900 !important;
         color: #00FF66 !important;
         letter-spacing: 4px;
         text-transform: uppercase;
+        margin-bottom: 10px;
     }
-    .cert-subtitle {
-        font-size: 20px !important;
+    .cert-academy {
+        font-size: 22px !important;
+        font-weight: bold !important;
         color: #848e9c !important;
-        margin-bottom: 20px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 25px;
     }
     .cert-name {
-        font-size: 38px !important;
-        font-weight: bold !important;
+        font-size: 42px !important;
+        font-weight: 900 !important;
         color: #FFFFFF !important;
-        border-bottom: 2px solid #00FF66;
+        border-bottom: 3px solid #00FF66;
         display: inline-block;
-        padding-bottom: 5px;
-        margin: 15px 0;
+        padding-bottom: 8px;
+        margin: 20px 0;
+        letter-spacing: 2px;
     }
     .cert-body {
         font-size: 22px !important;
         color: #D1D4DC !important;
-        margin: 15px 0;
+        margin: 12px 0;
     }
     .cert-score {
-        font-size: 50px !important;
+        font-size: 45px !important;
         font-weight: bold !important;
         color: #00FF66 !important;
         margin: 10px 0;
+    }
+    .cert-rank {
+        font-size: 26px !important;
+        font-weight: bold !important;
+        color: #FFD700 !important;
+        background: #1e222d;
+        display: inline-block;
+        padding: 10px 25px;
+        border-radius: 8px;
+        border: 1.5px solid #FFD700;
+        margin: 18px 0;
     }
     .cert-footer {
         display: flex;
@@ -140,14 +168,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown('<div class="main-title">KASUM</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">AHMAD</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="main-title">ONLINE TEST</div>', unsafe_allow_html=True
+)
+st.markdown('<div class="sub-title">PORTAL</div>', unsafe_allow_html=True)
 st.write("---")
 
 # Session State баптаулары
 if "users" not in st.session_state:
     st.session_state.users = {
         "director": {
+            "name": "Қасым Ахмад (Директор)",
             "pass": "dir123",
             "role": "director",
             "fails": 0,
@@ -155,6 +186,7 @@ if "users" not in st.session_state:
             "attempts": 9999,
         },
         "zam": {
+            "name": "Зам Директор",
             "pass": "zam123",
             "role": "zam",
             "fails": 0,
@@ -203,7 +235,7 @@ curr_time = time.time()
 
 # --- КІРУ БӨЛІМІ ---
 if not st.session_state.logged_user:
-    st.subheader("🔑 Trading Terminal Login")
+    st.subheader("🔑 Жүйеге Кіру")
     col1, col2 = st.columns([1, 1])
     with col1:
         login = st.text_input("Логин:")
@@ -229,7 +261,8 @@ if not st.session_state.logged_user:
                         )
                         st.session_state.login_logs.append(
                             {
-                                "user": login,
+                                "user": usr.get("name", login),
+                                "username": login,
                                 "time": login_time,
                                 "role": usr["role"],
                             }
@@ -250,7 +283,15 @@ if not st.session_state.logged_user:
 else:
     user_info = st.session_state.users[st.session_state.logged_user]
     role = user_info["role"]
-    st.sidebar.markdown(f"📈 **Терминал:** `{st.session_state.logged_user}`")
+    full_name = user_info.get("name", st.session_state.logged_user)
+
+    st.markdown(
+        f'<div class="welcome-text">👋 Welcome, {full_name}!</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.sidebar.markdown(f"📈 **Аты-жөні:** `{full_name}`")
+    st.sidebar.markdown(f"👤 **Логин:** `{st.session_state.logged_user}`")
     st.sidebar.markdown(
         f"🏷️ **Статус:** `<span style='color:#00FF66'>{role.upper()}</span>`",
         unsafe_allow_html=True,
@@ -258,7 +299,7 @@ else:
 
     if role == "student":
         st.sidebar.markdown(
-            f"🔑 **Қалған доступ (мүмкіндік):** `{user_info.get('attempts', 0)}`"
+            f"🔑 **Қалған доступ:** `{user_info.get('attempts', 0)}`"
         )
 
     if st.sidebar.button("Шығу / Logout"):
@@ -285,7 +326,7 @@ else:
                 st.info("ℹ️ Әлі ешқандай оқушы тест тапсырмады.")
             else:
                 student_list = list(
-                    set(r["user"] for r in st.session_state.results)
+                    set(r["user_name"] for r in st.session_state.results)
                 )
                 selected_student = st.selectbox(
                     "Оқушыны таңдаңыз:", student_list
@@ -294,7 +335,7 @@ else:
                 student_results = [
                     r
                     for r in st.session_state.results
-                    if r["user"] == selected_student
+                    if r["user_name"] == selected_student
                 ]
 
                 st.write(
@@ -317,7 +358,7 @@ else:
                     )
 
         with tab2:
-            st.subheader("🔑 Оқушыларға тест тапсыруға доступ (мүмкіндік) беру")
+            st.subheader("🔑 Оқушыларға тест тапсыруға доступ беру")
             students = {
                 k: v
                 for k, v in st.session_state.users.items()
@@ -327,7 +368,9 @@ else:
                 st.info("Тіркелген оқушылар жоқ.")
             else:
                 st_target = st.selectbox(
-                    "Оқушыны таңдаңыз:", list(students.keys())
+                    "Оқушыны таңдаңыз:",
+                    options=list(students.keys()),
+                    format_func=lambda x: f"{students[x].get('name', x)} ({x})",
                 )
                 st.write(
                     f"Қазіргі қолжетімді тапсыру мүмкіндігі: **{st.session_state.users[st_target].get('attempts', 0)}** рет."
@@ -338,42 +381,44 @@ else:
                     st.session_state.users[st_target]["attempts"] = (
                         st.session_state.users[st_target].get("attempts", 0) + 1
                     )
-                    st.success(f"{st_target}-ға +1 доступ берілді!")
+                    st.success(f"+1 доступ берілді!")
                     st.rerun()
 
                 if col_b.button("+2 Доступ беру"):
                     st.session_state.users[st_target]["attempts"] = (
                         st.session_state.users[st_target].get("attempts", 0) + 2
                     )
-                    st.success(f"{st_target}-ға +2 доступ берілді!")
+                    st.success(f"+2 доступ берілді!")
                     st.rerun()
 
                 if col_c.button("+3 Доступ беру"):
                     st.session_state.users[st_target]["attempts"] = (
                         st.session_state.users[st_target].get("attempts", 0) + 3
                     )
-                    st.success(f"{st_target}-ға +3 доступ берілді!")
+                    st.success(f"+3 доступ берілді!")
                     st.rerun()
 
         with tab3:
             for log in reversed(st.session_state.login_logs):
                 st.write(
-                    f"⏱️ `{log['time']}` | 👤 User: **{log['user']}** ({log['role']})"
+                    f"⏱️ `{log['time']}` | 👤 User: **{log['user']}** (`{log['username']}`) - {log['role']}"
                 )
 
         with tab4:
             for r in st.session_state.results:
                 st.write(
-                    f"📈 **{r['user']}** | 📚 {r['subject']} | 🕒 {r['time']} | 🎯 Балл: `{r['score']}`"
+                    f"📈 **{r['user_name']}** | 📚 {r['subject']} | 🕒 {r['time']} | 🎯 Балл: `{r['score']}`"
                 )
 
         with tab5:
             for u_name, u_data in st.session_state.users.items():
                 if u_data["ban_until"] > curr_time:
-                    if st.button(f"Unban: {u_name}"):
+                    if st.button(
+                        f"Unban: {u_data.get('name', u_name)} ({u_name})"
+                    ):
                         u_data["ban_until"] = 0
                         u_data["fails"] = 0
-                        st.success(f"{u_name} баннан шығарылды!")
+                        st.success("Баннан шығарылды!")
                         st.rerun()
 
         with tab6:
@@ -383,23 +428,35 @@ else:
             )
             st.session_state.can_zam_add_q = allow_zam
 
+            dir_new_name = st.text_input(
+                "Директордың Аты-Жөні:",
+                value=st.session_state.users["director"].get("name", ""),
+            )
             new_dir_p = st.text_input(
                 "Жаңа Директор паролі:", type="password", key="np_dir"
             )
-            if st.button("Директор паролін жаңарту"):
+            if st.button("Директор деректерін жаңарту"):
+                st.session_state.users["director"]["name"] = dir_new_name
                 if new_dir_p.strip():
                     st.session_state.users["director"]["pass"] = (
                         new_dir_p.strip()
                     )
-                    st.success("Пароль ауыстырылды!")
+                st.success("Деректер сақталды!")
+                st.rerun()
 
+            zam_new_name = st.text_input(
+                "Замның Аты-Жөні:",
+                value=st.session_state.users["zam"].get("name", ""),
+            )
             new_zam_p = st.text_input(
                 "Жаңа Зам паролі:", type="password", key="np_zam"
             )
-            if st.button("Зам паролін жаңарту"):
+            if st.button("Зам деректерін жаңарту"):
+                st.session_state.users["zam"]["name"] = zam_new_name
                 if new_zam_p.strip():
                     st.session_state.users["zam"]["pass"] = new_zam_p.strip()
-                    st.success("Пароль ауыстырылды!")
+                st.success("Деректер сақталды!")
+                st.rerun()
 
     # --- СҰРАҚ ҚОСУ ЖӘНЕ ОҚУШЫҒА ДОСТУП БЕРУ (ЗАМ/ДИРЕКТОР) ---
     if role in ["director", "zam"]:
@@ -490,17 +547,16 @@ else:
                         st.success("✅ Сұрақ сақталды!")
 
         with z_tab2:
+            st_fullname = st.text_input("Оқушының Толық Аты-Жөні:")
             new_st_u = st.text_input("Оқушы логині:")
             new_st_p = st.text_input("Оқушы паролі:")
             init_attempts = st.number_input(
-                "Бастапқы доступ (мүмкіндік) саны:",
-                min_value=1,
-                max_value=10,
-                value=1,
+                "Бастапқы доступ саны:", min_value=1, max_value=10, value=1
             )
             if st.button("Оқушыны Тіркеу"):
-                if new_st_u and new_st_p:
+                if new_st_u and new_st_p and st_fullname:
                     st.session_state.users[new_st_u] = {
+                        "name": st_fullname,
                         "pass": new_st_p,
                         "role": "student",
                         "fails": 0,
@@ -508,27 +564,30 @@ else:
                         "attempts": init_attempts,
                     }
                     st.success("Оқушы сәтті қосылды!")
+                else:
+                    st.error("⚠️ Барлық өрістерді толтырыңыз!")
 
     # --- ОҚУШЫ ТЕСТІ ЖӘНЕ СЕРТИФИКАТ ---
     if role == "student":
-        # Егер оқушы тестті аяқтап, сертификат дайын болса
         if st.session_state.last_cert:
             cert = st.session_state.last_cert
 
-            # Сертификат дизайны (HTML/CSS)
+            # Сертификат: "KASUM AHMAD TEST ACADEMY" деп өзгертілді
             st.markdown(
                 f"""
             <div class="certificate-box">
-                <div class="cert-header">🏆 CERTIFICATE OF ACHIEVEMENT 🏆</div>
-                <div class="cert-subtitle">KASUM AHMAD TRADING ACADEMY</div>
+                <div class="cert-title">🏆 CERTIFICATE OF ACHIEVEMENT 🏆</div>
+                <div class="cert-academy">KASUM AHMAD TEST ACADEMY</div>
                 <p class="cert-body">Осы сертификат табысты түрде тест тапсырған оқушыға беріледі:</p>
-                <div class="cert-name">{cert['user']}</div>
+                <div class="cert-name">{cert['user_fullname']}</div>
+                <br>
                 <p class="cert-body">Пән: <b>{cert['subject']}</b></p>
                 <div class="cert-score">{cert['score']}</div>
                 <p class="cert-body">Жалпы нәтиже: <b>{cert['percentage']}%</b></p>
+                <div class="cert-rank">🥇 Рейтингтегі орны: {cert['rank']}-орын (Жалпы {cert['total_students']} оқушының ішінен)</div>
                 <div class="cert-footer">
                     <div>📅 Күні: {cert['date']}</div>
-                    <div>✍️ Қолы: <i>Kasum Ahmad</i></div>
+                    <div>✍️ Тексерілді</div>
                 </div>
             </div>
             """,
@@ -537,7 +596,7 @@ else:
 
             col_btn1, col_btn2 = st.columns([1, 1])
             with col_btn1:
-                st.info("ℹ️ Сертификат Директор кабинетіне сақталды.")
+                st.info("ℹ️ Нәтиже жүйеге сақталды.")
             with col_btn2:
                 if st.button("🚪 Жүйеден шығу (Logout)"):
                     st.session_state.logged_user = None
@@ -594,28 +653,54 @@ else:
                     percentage = round((score / total_q) * 100, 1)
                     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-                    # Директор базасына сақтау
                     st.session_state.results.append(
                         {
                             "user": st.session_state.logged_user,
+                            "user_name": full_name,
                             "subject": subject,
                             "time": now_str,
                             "score": f"{score}/{total_q}",
+                            "raw_score": score,
                             "step_scores": step_scores,
                         }
                     )
 
-                    # Оқушының тапсыру мүмкіндігін (доступ) 1-ге азайту
+                    sub_results = [
+                        r
+                        for r in st.session_state.results
+                        if r["subject"] == subject
+                    ]
+                    best_scores = {}
+                    for r in sub_results:
+                        u = r["user"]
+                        if (
+                            u not in best_scores
+                            or r["raw_score"] > best_scores[u]
+                        ):
+                            best_scores[u] = r["raw_score"]
+
+                    sorted_rank = sorted(
+                        best_scores.items(), key=lambda x: x[1], reverse=True
+                    )
+                    rank = 1
+                    for idx, (u, sc) in enumerate(sorted_rank):
+                        if u == st.session_state.logged_user:
+                            rank = idx + 1
+                            break
+
+                    total_students = len(best_scores)
+
                     st.session_state.users[st.session_state.logged_user][
                         "attempts"
                     ] -= 1
 
-                    # Сертификат мәліметін сақтау
                     st.session_state.last_cert = {
-                        "user": st.session_state.logged_user,
+                        "user_fullname": full_name,
                         "subject": subject,
                         "score": f"{score} / {total_q}",
                         "percentage": percentage,
+                        "rank": rank,
+                        "total_students": total_students,
                         "date": now_str,
                     }
 

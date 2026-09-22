@@ -5,7 +5,7 @@ import streamlit as st
 
 st.set_page_config(page_title="KASUM AHMAD", layout="wide")
 
-# Жіберілген көк-сұр текстуралық фон және БАРЛЫҚ МӘТІНДЕРДІ ҚЫЗЫЛ ҚЫЛУ CSS-і
+# Көк-сұр фон және БАРЛЫҚ МӘТІНДЕРДІ АШЫҚ ЖАСЫЛ (НЕОН) КЫЛУ CSS-і
 st.markdown(
     """
     <style>
@@ -21,7 +21,7 @@ st.markdown(
         font-size: 80px;
         font-weight: 800;
         letter-spacing: 5px;
-        color: #ff3333 !important;
+        color: #39ff14 !important;
         margin-bottom: 0px;
         line-height: 1;
         text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
@@ -31,34 +31,34 @@ st.markdown(
         font-size: 80px;
         font-weight: 800;
         letter-spacing: 5px;
-        color: #ff3333 !important;
+        color: #39ff14 !important;
         text-align: right;
         margin-top: 0px;
         line-height: 1;
         text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
     }
     
-    /* Барлық сөздерді және жазуларды қызыл қылу */
+    /* Барлық сөздерді, тақырыптарды және жазуларды ашық жасыл қылу */
     h1, h2, h3, h4, h5, h6, p, label, div, span, input, button, small, li { 
-        color: #ff3333 !important; 
+        color: #39ff14 !important; 
         font-weight: bold !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
     }
     
-    /* Батырмалардың стильдері */
+    /* Батырмалардың жасыл стилі */
     .stButton>button { 
         background-color: rgba(0, 0, 0, 0.6) !important; 
-        color: #ff3333 !important; 
-        border: 2px solid #ff3333 !important; 
+        color: #39ff14 !important; 
+        border: 2px solid #39ff14 !important; 
         border-radius: 8px;
         font-size: 16px !important;
     }
 
-    /* Input және Selectbox қызыл түсі */
+    /* Input және Selectbox жасыл түсі */
     .stTextInput>div>div>input {
-        color: #ff3333 !important;
+        color: #39ff14 !important;
         background-color: rgba(0, 0, 0, 0.5) !important;
-        border: 1px solid #ff3333 !important;
+        border: 1px solid #39ff14 !important;
     }
     </style>
 """,

@@ -3,7 +3,9 @@ import time
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="KASUM AHMAD - TRADING TEST", layout="wide")
+st.set_page_config(
+    page_title="KASUM AHMAD - TRADING TEST", layout="wide", page_icon="📜"
+)
 
 # TRADINGVIEW / BINANCE DARK STYLE CSS
 st.markdown(
@@ -82,6 +84,57 @@ st.markdown(
         color: #00FF66 !important;
         border-bottom: 2px solid #00FF66 !important;
     }
+
+    /* СЕРТИФИКАТ СТИЛІ */
+    .certificate-box {
+        border: 10px solid #00FF66;
+        padding: 40px;
+        background: #131722;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    .cert-header {
+        font-size: 45px !important;
+        font-weight: 900 !important;
+        color: #00FF66 !important;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+    }
+    .cert-subtitle {
+        font-size: 20px !important;
+        color: #848e9c !important;
+        margin-bottom: 20px;
+    }
+    .cert-name {
+        font-size: 38px !important;
+        font-weight: bold !important;
+        color: #FFFFFF !important;
+        border-bottom: 2px solid #00FF66;
+        display: inline-block;
+        padding-bottom: 5px;
+        margin: 15px 0;
+    }
+    .cert-body {
+        font-size: 22px !important;
+        color: #D1D4DC !important;
+        margin: 15px 0;
+    }
+    .cert-score {
+        font-size: 50px !important;
+        font-weight: bold !important;
+        color: #00FF66 !important;
+        margin: 10px 0;
+    }
+    .cert-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px dashed #2a2e39;
+    }
     </style>
 """,
     unsafe_allow_html=True,
@@ -143,6 +196,9 @@ if "results" not in st.session_state:
 if "logged_user" not in st.session_state:
     st.session_state.logged_user = None
 
+if "last_cert" not in st.session_state:
+    st.session_state.last_cert = None
+
 curr_time = time.time()
 
 # --- КІРУ БӨЛІМІ ---
@@ -160,7 +216,6 @@ if not st.session_state.logged_user:
                     left = int((usr["ban_until"] - curr_time) // 60)
                     st.error(f"⛔ Блокталғансыз! {left} мин қалды.")
                 elif usr["pass"] == password:
-                    # Оқушының доступ тапсыру мүмкіндігін тексеру
                     if usr["role"] == "student" and usr.get("attempts", 0) <= 0:
                         st.error(
                             "⛔ Сізде тест тапсыруға доступ жоқ! Директор немесе Зам-нан рұқсат сұраңыз."
@@ -168,6 +223,7 @@ if not st.session_state.logged_user:
                     else:
                         usr["fails"] = 0
                         st.session_state.logged_user = login
+                        st.session_state.last_cert = None
                         login_time = datetime.now().strftime(
                             "%Y-%m-%d %H:%M:%S"
                         )
@@ -207,6 +263,7 @@ else:
 
     if st.sidebar.button("Шығу / Logout"):
         st.session_state.logged_user = None
+        st.session_state.last_cert = None
         st.rerun()
 
     # --- ДИРЕКТОР ПАНЕЛІ ---
@@ -256,9 +313,7 @@ else:
                         cumulative_profit.append(curr)
 
                     st.line_chart(
-                        pd.DataFrame(
-                            {"Балл тренді": cumulative_profit}
-                        )
+                        pd.DataFrame({"Балл тренді": cumulative_profit})
                     )
 
         with tab2:
@@ -454,71 +509,114 @@ else:
                     }
                     st.success("Оқушы сәтті қосылды!")
 
-    # --- ОҚУШЫ ТЕСТІ (АВТО-ШЫҒУ ЖӘНЕ ДОСТУП АЗАЙТУ) ---
+    # --- ОҚУШЫ ТЕСТІ ЖӘНЕ СЕРТИФИКАТ ---
     if role == "student":
-        subject = st.selectbox(
-            "Пән таңдаңыз:", list(st.session_state.questions.keys())
-        )
-        q_list = st.session_state.questions[subject]
+        # Егер оқушы тестті аяқтап, сертификат дайын болса
+        if st.session_state.last_cert:
+            cert = st.session_state.last_cert
 
-        if q_list:
-            user_answers = {}
-            for i, q in enumerate(q_list):
-                st.markdown(f"#### ❓ {i+1}-сұрақ: {q['q']}")
-                if q.get("image"):
-                    st.image(q["image"], use_column_width=True)
+            # Сертификат дизайны (HTML/CSS)
+            st.markdown(
+                f"""
+            <div class="certificate-box">
+                <div class="cert-header">🏆 CERTIFICATE OF ACHIEVEMENT 🏆</div>
+                <div class="cert-subtitle">KASUM AHMAD TRADING ACADEMY</div>
+                <p class="cert-body">Осы сертификат табысты түрде тест тапсырған оқушыға беріледі:</p>
+                <div class="cert-name">{cert['user']}</div>
+                <p class="cert-body">Пән: <b>{cert['subject']}</b></p>
+                <div class="cert-score">{cert['score']}</div>
+                <p class="cert-body">Жалпы нәтиже: <b>{cert['percentage']}%</b></p>
+                <div class="cert-footer">
+                    <div>📅 Күні: {cert['date']}</div>
+                    <div>✍️ Қолы: <i>Kasum Ahmad</i></div>
+                </div>
+            </div>
+            """,
+                unsafe_allow_html=True,
+            )
 
-                opts = {k: v for k, v in q["options"].items() if v.strip()}
+            col_btn1, col_btn2 = st.columns([1, 1])
+            with col_btn1:
+                st.info("ℹ️ Сертификат Директор кабинетіне сақталды.")
+            with col_btn2:
+                if st.button("🚪 Жүйеден шығу (Logout)"):
+                    st.session_state.logged_user = None
+                    st.session_state.last_cert = None
+                    st.rerun()
 
-                if len(opts) <= 4 or len(q["correct"]) == 1:
-                    formatted = [f"{k}) {v}" for k, v in opts.items()]
-                    ans = st.radio(
-                        "Жауапты таңдаңыз:", formatted, key=f"q_{subject}_{i}"
-                    )
-                    user_answers[i] = [ans[0]]
-                else:
-                    st.write("Көп жауапты тест (бірнешеуін белгілеңіз):")
-                    selected = []
-                    for k, v in opts.items():
-                        if st.checkbox(f"{k}) {v}", key=f"q_{subject}_{i}_{k}"):
-                            selected.append(k)
-                    user_answers[i] = selected
+        else:
+            subject = st.selectbox(
+                "Пән таңдаңыз:", list(st.session_state.questions.keys())
+            )
+            q_list = st.session_state.questions[subject]
 
-            if st.button("🚀 Тестті Тапсыру және Шығу"):
-                score = 0
-                step_scores = []
-
+            if q_list:
+                user_answers = {}
                 for i, q in enumerate(q_list):
-                    u_ans = set(user_answers.get(i, []))
-                    c_ans = set(q["correct"])
-                    if u_ans == c_ans and len(u_ans) > 0:
-                        score += 1
-                        step_scores.append(1)
+                    st.markdown(f"#### ❓ {i+1}-сұрақ: {q['q']}")
+                    if q.get("image"):
+                        st.image(q["image"], use_column_width=True)
+
+                    opts = {k: v for k, v in q["options"].items() if v.strip()}
+
+                    if len(opts) <= 4 or len(q["correct"]) == 1:
+                        formatted = [f"{k}) {v}" for k, v in opts.items()]
+                        ans = st.radio(
+                            "Жауапты таңдаңыз:",
+                            formatted,
+                            key=f"q_{subject}_{i}",
+                        )
+                        user_answers[i] = [ans[0]]
                     else:
-                        step_scores.append(-1)
+                        st.write("Көп жауапты тест (бірнешеуін белгілеңіз):")
+                        selected = []
+                        for k, v in opts.items():
+                            if st.checkbox(
+                                f"{k}) {v}", key=f"q_{subject}_{i}_{k}"
+                            ):
+                                selected.append(k)
+                        user_answers[i] = selected
 
-                wrong_score = len(q_list) - score
+                if st.button("🚀 Тестті Аяқтау және Сертификат Алу"):
+                    score = 0
+                    step_scores = []
 
-                # Нәтижелерді директор базасына жіберу
-                st.session_state.results.append(
-                    {
+                    for i, q in enumerate(q_list):
+                        u_ans = set(user_answers.get(i, []))
+                        c_ans = set(q["correct"])
+                        if u_ans == c_ans and len(u_ans) > 0:
+                            score += 1
+                            step_scores.append(1)
+                        else:
+                            step_scores.append(-1)
+
+                    total_q = len(q_list)
+                    percentage = round((score / total_q) * 100, 1)
+                    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+                    # Директор базасына сақтау
+                    st.session_state.results.append(
+                        {
+                            "user": st.session_state.logged_user,
+                            "subject": subject,
+                            "time": now_str,
+                            "score": f"{score}/{total_q}",
+                            "step_scores": step_scores,
+                        }
+                    )
+
+                    # Оқушының тапсыру мүмкіндігін (доступ) 1-ге азайту
+                    st.session_state.users[st.session_state.logged_user][
+                        "attempts"
+                    ] -= 1
+
+                    # Сертификат мәліметін сақтау
+                    st.session_state.last_cert = {
                         "user": st.session_state.logged_user,
                         "subject": subject,
-                        "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                        "score": f"{score}/{len(q_list)}",
-                        "step_scores": step_scores,
+                        "score": f"{score} / {total_q}",
+                        "percentage": percentage,
+                        "date": now_str,
                     }
-                )
 
-                # Оқушының тапсыру мүмкіндігін (доступ) 1-ге азайту
-                st.session_state.users[st.session_state.logged_user][
-                    "attempts"
-                ] -= 1
-
-                # Сессияны жауып, жүйеден шығару
-                st.session_state.logged_user = None
-                st.success(
-                    "✅ Тест аяқталды! Нәтижеңіз Директор кабинетіне сақталды."
-                )
-                time.sleep(2)  # 2 секунд күтіп, автоматты түрде қайта жүктеледі
-                st.rerun()
+                    st.rerun()

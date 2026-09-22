@@ -3,7 +3,7 @@ import streamlit as st
 # Бет баптаулары
 st.set_page_config(page_title="Kasum Ahmad", page_icon="🎓", layout="wide")
 
-# CSS: Дәл суреттегідей фон (сызықтар, дөңгелектер) және "KASUM AHMAD" дизайны
+# CSS: Дәл суреттегідей фон, "KASUM AHMAD" тақырыбы және ЖАСЫЛ КІРУ БАТЫРМАСЫ
 st.markdown("""
 <style>
     /* Негізгі фон және графикалық элементтер (круги & линиялар) */
@@ -40,23 +40,27 @@ st.markdown("""
     /* Инпут өрістерінің дизайны */
     .stTextInput > div > div > input {
         background-color: #162a45 !important;
-        color: #ffffff !important;
+        color: #00FF66 !important;
         border: 1px solid #3b82f6 !important;
         border-radius: 6px !important;
     }
 
-    /* Батырманың дизайны */
+    /* ЖАСЫЛ БАТЫРМА (НЕОН СТИЛЬДІ) */
     .stButton > button {
-        background-color: #2563eb;
-        color: white;
-        font-weight: bold;
-        border-radius: 6px;
-        border: none;
-        padding: 6px 20px;
+        background: linear-gradient(135deg, #1e222d 0%, #2a2e39 100%) !important; 
+        color: #00FF66 !important; 
+        border: 1.5px solid #00FF66 !important; 
+        border-radius: 6px !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 0 10px rgba(0, 255, 102, 0.2) !important;
+        padding: 6px 24px !important;
     }
     .stButton > button:hover {
-        background-color: #1d4ed8;
-        color: white;
+        background: #00FF66 !important;
+        color: #0b0e14 !important;
+        box-shadow: 0 0 20px rgba(0, 255, 102, 0.8) !important;
     }
 </style>
 

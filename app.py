@@ -2,10 +2,9 @@ import time
 from datetime import datetime
 import streamlit as st
 
-# Страница баптаулары
 st.set_page_config(page_title="KASUM AHMAD", layout="wide")
 
-# 1-ші фото артқы фонға және стильдер (MITKO ANDREY стилінде)
+# Жіберілген көк-сұр текстуралық фонды қосу
 st.markdown(
     """
     <style>
@@ -14,7 +13,7 @@ st.markdown(
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        color: #ffffff;
+        background-attachment: fixed;
     }
     
     .main-title {
@@ -41,7 +40,7 @@ st.markdown(
     }
     
     .stButton>button { 
-        background-color: rgba(0, 0, 0, 0.6); 
+        background-color: rgba(0, 0, 0, 0.5); 
         color: #ffffff; 
         border: 1px solid #ffffff; 
         border-radius: 5px;
@@ -51,7 +50,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# MITKO ANDREY стиліндегі басты жазулар (KASUM AHMAD)
 st.markdown('<div class="main-title">KASUM</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">AHMAD</div>', unsafe_allow_html=True)
 st.write("---")

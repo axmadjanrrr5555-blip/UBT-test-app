@@ -1,45 +1,72 @@
 import streamlit as st
 
-# Настройки страницы
-st.set_page_config(page_title="Қасым Ахмад", page_icon="🎓", layout="wide")
+# Бет баптаулары
+st.set_page_config(page_title="Kasum Ahmad", page_icon="🎓", layout="wide")
 
-# CSS стили с заголовками по углам
+# CSS: Дәл суреттегідей фон (сызықтар, дөңгелектер) және "KASUM AHMAD" дизайны
 st.markdown("""
 <style>
+    /* Негізгі фон және графикалық элементтер (круги & линиялар) */
     .stApp {
-        background-color: #121824;
+        background-color: #0c1527;
+        background-image: 
+            radial-gradient(circle at 8% 35%, transparent 60px, #1a365d 61px, #1a365d 65px, transparent 66px),
+            radial-gradient(circle at 92% 55%, transparent 110px, #1a365d 111px, #1a365d 115px, transparent 116px),
+            linear-gradient(135deg, transparent 45%, #1d4ed8 45.5%, #1d4ed8 46.5%, transparent 47%),
+            linear-gradient(45deg, transparent 30%, #1d4ed8 30.5%, #1d4ed8 31.5%, transparent 32%),
+            linear-gradient(125deg, transparent 70%, #1d4ed8 70.5%, #1d4ed8 71.5%, transparent 72%);
+        background-attachment: fixed;
         color: #ffffff;
     }
+
+    /* KASUM AHMAD тақырыбының дизайны */
     .header-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 20px 40px;
+        padding: 10px 10%;
         width: 100%;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
     }
     .header-title {
-        font-size: 3rem;
-        font-weight: 800;
-        color: #adff2f;
-        text-shadow: 0 0 10px rgba(173, 255, 47, 0.4);
-        letter-spacing: 2px;
+        font-size: 3.2rem;
+        font-weight: 900;
+        color: #ffffff;
+        font-family: 'Arial Black', sans-serif;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.7), 0 0 30px rgba(255, 255, 255, 0.4);
+        letter-spacing: 4px;
     }
-    .stButton>button {
+
+    /* Инпут өрістерінің дизайны */
+    .stTextInput > div > div > input {
+        background-color: #162a45 !important;
+        color: #ffffff !important;
+        border: 1px solid #3b82f6 !important;
+        border-radius: 6px !important;
+    }
+
+    /* Батырманың дизайны */
+    .stButton > button {
         background-color: #2563eb;
         color: white;
         font-weight: bold;
-        border-radius: 8px;
+        border-radius: 6px;
+        border: none;
+        padding: 6px 20px;
+    }
+    .stButton > button:hover {
+        background-color: #1d4ed8;
+        color: white;
     }
 </style>
 
 <div class="header-container">
-    <div class="header-title">ҚАСЫМ</div>
-    <div class="header-title">АХМАД</div>
+    <div class="header-title">KASUM</div>
+    <div class="header-title">AHMAD</div>
 </div>
 """, unsafe_allow_html=True)
 
-# Инициализация состояния
+# Сессия жадын инициализациялау
 if 'question_limit' not in st.session_state:
     st.session_state.question_limit = 10
 if 'questions' not in st.session_state:
@@ -49,9 +76,9 @@ if 'logged_in' not in st.session_state:
 if 'user_role' not in st.session_state:
     st.session_state.user_role = None
 
-# ----------------- ФОРМА ВХОДА -----------------
+# ----------------- АВТОРИЗАЦИЯ -----------------
 if not st.session_state.logged_in:
-    st.subheader("🔑 Жүйеге кіру")
+    st.subheader("🔑 Кіру")
     
     col1, col2 = st.columns([1, 1])
     with col1:
@@ -72,7 +99,7 @@ if not st.session_state.logged_in:
             else:
                 st.error("Логин немесе пароль қате!")
 
-# ----------------- ЛИЧНЫЙ КАБИНЕТ -----------------
+# ----------------- НЕГІЗГІ КАБИНЕТ -----------------
 else:
     st.sidebar.write(f"**Ағымдағы пайдаланушы:** {st.session_state.user_role.upper()}")
     if st.sidebar.button("Жүйеден шығу"):
@@ -80,7 +107,7 @@ else:
         st.session_state.user_role = None
         st.rerun()
 
-    # КАБИНЕТ ДИРЕКТОРА
+    # ДИРЕКТОР КАБИНЕТІ
     if st.session_state.user_role == "director":
         st.header("👨‍💼 Директор кабинеті")
         
@@ -128,9 +155,9 @@ else:
                 else:
                     st.error("Барлық өрістерді толтырыңыз!")
 
-    # КАБИНЕТ ЗАМА
+    # ЗАМ (ОРЫНБАСАР) КАБИНЕТІ
     elif st.session_state.user_role == "zam":
-        st.header("🧑‍💼 Зам (Орынбасар) кабинеті")
+        st.header("🧑‍💼 Зам кабинеті")
         st.info(f"📊 Директор белгілеген лимит: **{st.session_state.question_limit}** | Еңгізілген сұрақтар: **{len(st.session_state.questions)}**")
         st.divider()
 
@@ -178,7 +205,7 @@ else:
                 else:
                     st.error("Барлық өрістерді толтырыңыз!")
 
-    # СПИСОК ВОПРОСОВ
+    # СҰРАҚТАР ТІЗІМІ
     st.divider()
     st.subheader("📋 Қосылған сұрақтар тізімі")
     if len(st.session_state.questions) == 0:

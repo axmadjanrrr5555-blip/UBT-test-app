@@ -2,20 +2,59 @@ import time
 from datetime import datetime
 import streamlit as st
 
-# Экран қара, жазулар жасыл стиль
+# Страница баптаулары
+st.set_page_config(page_title="KASUM AHMAD", layout="wide")
+
+# 1-ші фото артқы фонға және стильдер (MITKO ANDREY стилінде)
 st.markdown(
     """
     <style>
-    .stApp { background-color: #000000; color: #00FF00; }
-    h1, h2, h3, h4, h5, h6, p, label, div, span, input { color: #00FF00 !important; }
-    .stButton>button { background-color: #111; color: #00FF00; border: 1px solid #00FF00; }
-    .stRadio label { color: #00FF00 !important; }
+    .stApp {
+        background-image: url("https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1000&auto=format&fit=crop");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: #ffffff;
+    }
+    
+    .main-title {
+        font-size: 80px;
+        font-weight: 800;
+        letter-spacing: 5px;
+        color: #ffffff;
+        margin-bottom: 0px;
+        line-height: 1;
+    }
+    
+    .sub-title {
+        font-size: 80px;
+        font-weight: 800;
+        letter-spacing: 5px;
+        color: #ffffff;
+        text-align: right;
+        margin-top: 0px;
+        line-height: 1;
+    }
+    
+    h1, h2, h3, h4, h5, h6, p, label, div, span, input { 
+        color: #ffffff !important; 
+    }
+    
+    .stButton>button { 
+        background-color: rgba(0, 0, 0, 0.6); 
+        color: #ffffff; 
+        border: 1px solid #ffffff; 
+        border-radius: 5px;
+    }
     </style>
 """,
     unsafe_allow_html=True,
 )
 
-st.title("🟢 ҰБТ Басқару Жүйесі")
+# MITKO ANDREY стиліндегі басты жазулар (KASUM AHMAD)
+st.markdown('<div class="main-title">KASUM</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">AHMAD</div>', unsafe_allow_html=True)
+st.write("---")
 
 # Базаны баптау
 if "users" not in st.session_state:
@@ -30,7 +69,6 @@ if "users" not in st.session_state:
     }
 
 if "questions" not in st.session_state:
-    # Пәндер бойынша сұрақтар базасы
     st.session_state.questions = {
         "Математика": [],
         "Қазақстан тарихы": [],
@@ -38,10 +76,10 @@ if "questions" not in st.session_state:
     }
 
 if "login_logs" not in st.session_state:
-    st.session_state.login_logs = []  # Қай ПК/Логин қашан кірді
+    st.session_state.login_logs = []
 
 if "can_zam_add_q" not in st.session_state:
-    st.session_state.can_zam_add_q = True  # Замға сұрақ қосу рұқсаты
+    st.session_state.can_zam_add_q = True
 
 if "results" not in st.session_state:
     st.session_state.results = []
@@ -53,7 +91,7 @@ curr_time = time.time()
 
 # Кіру блогы
 if not st.session_state.logged_user:
-    st.subheader("🔑 Жүйеге кіру")
+    st.subheader("🔑 Кіру")
     login = st.text_input("Логин:")
     password = st.text_input("Пароль:", type="password")
 
@@ -66,13 +104,10 @@ if not st.session_state.logged_user:
             elif usr["pass"] == password:
                 usr["fails"] = 0
                 st.session_state.logged_user = login
-
-                # Кіру кім, қашан жасағанын логқа жазу (Тек Директор көреді)
                 login_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 st.session_state.login_logs.append(
                     {"user": login, "time": login_time, "role": usr["role"]}
                 )
-
                 st.rerun()
             else:
                 usr["fails"] += 1
@@ -94,38 +129,34 @@ else:
         st.session_state.logged_user = None
         st.rerun()
 
-    # ==================== ТЕК ДИРЕКТОР ПАНЕЛІ ====================
+    # --- ДИРЕКТОР ПАНЕЛІ ---
     if role == "director":
         tab1, tab2, tab3, tab4, tab5 = st.tabs(
             [
-                "🖥️ ПК/Кіру Тарихы (Логтар)",
-                "🔑 Барлық Логин/Парольдер",
+                "🖥️ ПК/Кіру Тарихы",
+                "🔑 Логин/Парольдер",
                 "📊 Тест Нәтижелері",
                 "🔓 Банды Шешу",
-                "🔐 Пароль Ауыстыру & Доступ",
+                "🔐 Пароль & Доступ",
             ]
         )
 
         with tab1:
-            st.subheader("🖥️ Жүйеге кірген ПК мен пайдаланушылар уақыты:")
             for log in reversed(st.session_state.login_logs):
                 st.write(
                     f"⏰ **{log['time']}** | 👤 Логин: `{log['user']}` ({log['role']})"
                 )
 
         with tab2:
-            st.subheader("🔑 Зам және Оқушылардың парольдері:")
             st.json(st.session_state.users)
 
         with tab3:
-            st.subheader("📊 Оқушылардың тест нәтижелері:")
             for r in st.session_state.results:
                 st.write(
                     f"👤 {r['user']} | 📚 Пән: {r['subject']} | 🕒 {r['time']} | Балл: {r['score']}"
                 )
 
         with tab4:
-            st.subheader("🔓 Банды алып тастау:")
             for u_name, u_data in st.session_state.users.items():
                 if u_data["ban_until"] > curr_time:
                     if st.button(f"Unban: {u_name}"):
@@ -135,17 +166,12 @@ else:
                         st.rerun()
 
         with tab5:
-            st.subheader("⚙️ Доступ және Парольдерді басқару:")
-
-            # Замға сұрақ қосу доступ беру/алу
             allow_zam = st.checkbox(
                 "Зам директорға сұрақ қосуға доступ беру",
                 value=st.session_state.can_zam_add_q,
             )
             st.session_state.can_zam_add_q = allow_zam
 
-            st.write("---")
-            # Директордың өз паролін ауыстыруы
             new_dir_p = st.text_input(
                 "Жаңа Директор паролі:", type="password", key="np_dir"
             )
@@ -156,7 +182,6 @@ else:
                     )
                     st.success("Ауыстырылды!")
 
-            # Замның паролін ауыстыруы
             new_zam_p = st.text_input(
                 "Жаңа Зам паролі:", type="password", key="np_zam"
             )
@@ -165,23 +190,19 @@ else:
                     st.session_state.users["zam"]["pass"] = new_zam_p.strip()
                     st.success("Ауыстырылды!")
 
-    # ==================== СҰРАҚ ҚОСУ БАСҚАРУЫ (ДИРЕКТОР / ЗАМ) ====================
-    if role == "director" or (role == "zam"):
+    # --- ЗАМ/ДИРЕКТОР СҰРАҚ ҚОСУ ---
+    if role == "director" or role == "zam":
         st.subheader("⚙️ Басқару Панелі")
-        z_tab1, z_tab2 = st.tabs(["📝 Сұрақ Құрастыру (4 вариант)", "👤 Оқушы Қосу"])
+        z_tab1, z_tab2 = st.tabs(["📝 Сұрақ Құрастыру", "👤 Оқушы Қосу"])
 
         with z_tab1:
             if role == "zam" and not st.session_state.can_zam_add_q:
-                st.error(
-                    "⛔ Директор сізге сұрақ қосу рұқсатын жауып тастаған!"
-                )
+                st.error("⛔ Доступ жабық!")
             else:
-                st.write("**Жаңа сұрақ енгізу (A, B, C, D нұсқаларымен):**")
                 selected_sub = st.selectbox(
-                    "Пәнді таңдаңыз:", list(st.session_state.questions.keys())
+                    "Пән:", list(st.session_state.questions.keys())
                 )
-                q_text = st.text_input("Сұрақты жазыңыз:")
-
+                q_text = st.text_input("Сұрақ:")
                 col1, col2 = st.columns(2)
                 with col1:
                     opt_a = st.text_input("A жауабы:")
@@ -189,9 +210,8 @@ else:
                 with col2:
                     opt_c = st.text_input("C жауабы:")
                     opt_d = st.text_input("D жауабы:")
-
                 correct_opt = st.radio(
-                    "Қай нұсқа ДҰРЫС?", ["A", "B", "C", "D"], horizontal=True
+                    "Дұрыс нұсқа:", ["A", "B", "C", "D"], horizontal=True
                 )
 
                 if st.button("Сұрақты сақтау"):
@@ -208,12 +228,9 @@ else:
                                 "correct": correct_opt,
                             }
                         )
-                        st.success("Сұрақ сәтті қосылды!")
-                    else:
-                        st.warning("Барлық өрістерді толтырыңыз!")
+                        st.success("Сұрақ қосылды!")
 
         with z_tab2:
-            st.write("**Жаңа оқушы тіркеу:**")
             new_st_u = st.text_input("Оқушы логині:")
             new_st_p = st.text_input("Оқушы паролі:")
             if st.button("Оқушыны сақтау"):
@@ -224,50 +241,38 @@ else:
                         "fails": 0,
                         "ban_until": 0,
                     }
-                    st.success(f"Оқушы {new_st_u} қосылды!")
+                    st.success("Оқушы қосылды!")
 
-    # ==================== ОҚУШЫ ТЕСТІ ====================
+    # --- ОҚУШЫ ТЕСТІ ---
     if role == "student":
-        st.subheader("✍️ Тестілеу Бөлімі")
-
-        # Пән таңдау
         subject = st.selectbox(
-            "Қай пәннен тест тапсырасыз?",
-            list(st.session_state.questions.keys()),
+            "Пән таңдаңыз:", list(st.session_state.questions.keys())
         )
-
         q_list = st.session_state.questions[subject]
 
-        if not q_list:
-            st.info("Бұл пән бойынша әлі сұрақтар қосылмаған.")
-        else:
-            st.write(f"--- \n ### 📚 Пән: {subject}")
+        if q_list:
             user_answers = {}
-
             for i, q in enumerate(q_list):
                 st.write(f"**{i+1}. {q['q']}**")
                 opts = q["options"]
                 formatted_opts = [f"{k}) {v}" for k, v in opts.items()]
                 ans = st.radio(
-                    "Жауапты таңдаңыз:", formatted_opts, key=f"q_{subject}_{i}"
+                    "Жауап:", formatted_opts, key=f"q_{subject}_{i}"
                 )
-                user_answers[i] = ans[0]  # Алынған 'A', 'B', 'C' немесе 'D'
+                user_answers[i] = ans[0]
 
-            if st.button("Тестті аяқтау және тапсыру"):
-                score = 0
-                for i, q in enumerate(q_list):
-                    if user_answers.get(i) == q["correct"]:
-                        score += 1
-
-                test_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+            if st.button("Тестті аяқтау"):
+                score = sum(
+                    1
+                    for i, q in enumerate(q_list)
+                    if user_answers.get(i) == q["correct"]
+                )
                 st.session_state.results.append(
                     {
                         "user": st.session_state.logged_user,
                         "subject": subject,
-                        "time": test_time,
+                        "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
                         "score": f"{score}/{len(q_list)}",
                     }
                 )
-                st.success(
-                    f"Тест аяқталды! Сіздің нәтижеңіз: {score} / {len(q_list)}"
-                )
+                st.success(f"Нәтиже: {score} / {len(q_list)}")

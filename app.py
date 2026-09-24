@@ -307,58 +307,102 @@ else:
         st.session_state.last_cert = None
         st.rerun()
 
-    # --- ДИРЕКТОР ПАНЕЛІ ---
+    # --- ДИРЕКТОР ПАНЕЛІ (Сұрақ құрастыру, оқушы қосу және минут/доступ қою) ---
     if role == "director":
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-            [
-                "📊 Оқушылар Графигі",
-                "🔑 Доступ/Мүмкіндік Беру",
-                "🖥️ Кіру Тарихы",
-                "📋 Тест Нәтижелері",
-                "🔓 Банды Шешу",
-                "🔐 Доступ Реттеу",
-            ]
-        )
+        tab1, tab2 = st.tabs(["📝 Сұрақ Құрастыру", "👤 Оқушы Қосу & Доступ (Минут) беру"])
 
         with tab1:
-            st.subheader("📈 Оқушылардың графиктерін қарау")
-            if not st.session_state.results:
-                st.info("ℹ️ Әлі ешқандай оқушы тест тапсырмады.")
-            else:
-                student_list = list(
-                    set(r["user_name"] for r in st.session_state.results)
-                )
-                selected_student = st.selectbox(
-                    "Оқушыны таңдаңыз:", student_list
-                )
+            selected_sub = st.selectbox(
+                "Пән таңдаңыз:", list(st.session_state.questions.keys())
+            )
+            q_text = st.text_input("Сұрақтың мәтіні:")
+            img_url = st.text_input("🖼️ Сурет сілтемесі (URL, міндетті емес):")
 
-                student_results = [
-                    r
-                    for r in st.session_state.results
-                    if r["user_name"] == selected_student
-                ]
+            st.write("Варианттар (A-F):")
+            c1, c2 = st.columns(2)
+            with c1:
+                opt_a = st.text_input("A жауабы:")
+                opt_b = st.text_input("B жауабы:")
+                opt_c = st.text_input("C жауабы:")
+            with c2:
+                opt_d = st.text_input("D жауабы:")
+                opt_e = st.text_input("E жауабы (міндетті емес):")
+                opt_f = st.text_input("F жауабы (міндетті емес):")
 
-                st.write(
-                    f"**{selected_student}** оқушысының тапсырған тесттері ({len(student_results)} рет):"
-                )
+            st.write("Дұрыс жауаптар (макс 3):")
+            ca, cb, cc = st.checkbox("A"), st.checkbox("B"), st.checkbox("C")
+            cd, ce, cf = st.checkbox("D"), st.checkbox("E"), st.checkbox("F")
 
-                for idx, res in enumerate(reversed(student_results)):
-                    st.markdown(
-                        f"--- \n 🕒 **Уақыты:** {res['time']} | 📚 **Пән:** {res['subject']} | 🎯 **Балл:** `{res['score']}`"
+            correct_selected = []
+            if ca:
+                correct_selected.append("A")
+            if cb:
+                correct_selected.append("B")
+            if cc:
+                correct_selected.append("C")
+            if cd:
+                correct_selected.append("D")
+            if ce:
+                correct_selected.append("E")
+            if cf:
+                correct_selected.append("F")
+
+            if st.button("Сұрақты Сақтау"):
+                has_extra = bool(opt_e.strip() or opt_f.strip())
+                if not q_text or not (opt_a and opt_b and opt_c and opt_d):
+                    st.error(
+                        "⚠️ А, B, C, D варианттары мен сұрақ толтырылуы тиіс!"
                     )
-
-                    cumulative_profit = [0]
-                    curr = 0
-                    for s in res["step_scores"]:
-                        curr += s
-                        cumulative_profit.append(curr)
-
-                    st.line_chart(
-                        pd.DataFrame({"Балл тренді": cumulative_profit})
+                elif len(correct_selected) == 0:
+                    st.error("⚠️ Кемінде 1 дұрыс жауап белгілеңіз!")
+                elif len(correct_selected) > 3:
+                    st.error("⚠️ 3-тен артық дұрыс жауап таңдауға болмайды!")
+                elif not has_extra and len(correct_selected) > 1:
+                    st.error(
+                        "⚠️ 4 вариантты тестіде тек 1 дұрыс жауап болуы керек!"
                     )
+                else:
+                    st.session_state.questions[selected_sub].append(
+                        {
+                            "q": q_text,
+                            "options": {
+                                "A": opt_a,
+                                "B": opt_b,
+                                "C": opt_c,
+                                "D": opt_d,
+                                "E": opt_e,
+                                "F": opt_f,
+                            },
+                            "correct": correct_selected,
+                            "image": img_url.strip(),
+                        }
+                    )
+                    st.success("✅ Сұрақ сақталды!")
 
         with tab2:
-            st.subheader("🔑 Оқушыларға тест тапсыруға доступ беру")
+            st.subheader("➕ Жаңа Оқушы Қосу")
+            st_fullname = st.text_input("Оқушының Толық Аты-Жөні:")
+            new_st_u = st.text_input("Оқушы логині:")
+            new_st_p = st.text_input("Оқушы паролі:")
+            init_attempts = st.number_input(
+                "Бастапқы доступ/мүмкіндік саны:", min_value=1, max_value=10, value=1
+            )
+            if st.button("Оқушыны Тіркеу"):
+                if new_st_u and new_st_p and st_fullname:
+                    st.session_state.users[new_st_u] = {
+                        "name": st_fullname,
+                        "pass": new_st_p,
+                        "role": "student",
+                        "fails": 0,
+                        "ban_until": 0,
+                        "attempts": init_attempts,
+                    }
+                    st.success("Оқушы сәтті қосылды!")
+                else:
+                    st.error("⚠️ Барлық өрістерді толтырыңыз!")
+
+            st.write("---")
+            st.subheader("🔑 Бар Оқушыға Доступ (Мүмкіндік) Беру")
             students = {
                 k: v
                 for k, v in st.session_state.users.items()
@@ -398,181 +442,84 @@ else:
                     st.success(f"+3 доступ берілді!")
                     st.rerun()
 
-        with tab3:
-            for log in reversed(st.session_state.login_logs):
-                st.write(
-                    f"⏱️ `{log['time']}` | 👤 User: **{log['user']}** (`{log['username']}`) - {log['role']}"
-                )
-
-        with tab4:
-            for r in st.session_state.results:
-                st.write(
-                    f"📈 **{r['user_name']}** | 📚 {r['subject']} | 🕒 {r['time']} | 🎯 Балл: `{r['score']}`"
-                )
-
-        with tab5:
-            for u_name, u_data in st.session_state.users.items():
-                if u_data["ban_until"] > curr_time:
-                    if st.button(
-                        f"Unban: {u_data.get('name', u_name)} ({u_name})"
-                    ):
-                        u_data["ban_until"] = 0
-                        u_data["fails"] = 0
-                        st.success("Баннан шығарылды!")
-                        st.rerun()
-
-        with tab6:
-            allow_zam = st.checkbox(
-                "Зам директорға сұрақ қосуға рұқсат",
-                value=st.session_state.can_zam_add_q,
+    # --- ЗАМ ДИРЕКТОР ПАНЕЛІ ---
+    if role == "zam":
+        st.subheader("⚙️ Сұрақтарды басқару")
+        if not st.session_state.can_zam_add_q:
+            st.error("⛔ Сұрақ қосуға доступ жабық!")
+        else:
+            selected_sub = st.selectbox(
+                "Пән таңдаңыз:", list(st.session_state.questions.keys())
             )
-            st.session_state.can_zam_add_q = allow_zam
+            q_text = st.text_input("Сұрақтың мәтіні:")
+            img_url = st.text_input("🖼️ Сурет сілтемесі (URL, міндетті емес):")
 
-            dir_new_name = st.text_input(
-                "Директордың Аты-Жөні:",
-                value=st.session_state.users["director"].get("name", ""),
-            )
-            new_dir_p = st.text_input(
-                "Жаңа Директор паролі:", type="password", key="np_dir"
-            )
-            if st.button("Директор деректерін жаңарту"):
-                st.session_state.users["director"]["name"] = dir_new_name
-                if new_dir_p.strip():
-                    st.session_state.users["director"]["pass"] = (
-                        new_dir_p.strip()
+            st.write("Варианттар (A-F):")
+            c1, c2 = st.columns(2)
+            with c1:
+                opt_a = st.text_input("A жауабы:")
+                opt_b = st.text_input("B жауабы:")
+                opt_c = st.text_input("C жауабы:")
+            with c2:
+                opt_d = st.text_input("D жауабы:")
+                opt_e = st.text_input("E жауабы (міндетті емес):")
+                opt_f = st.text_input("F жауабы (міндетті емес):")
+
+            st.write("Дұрыс жауаптар (макс 3):")
+            ca, cb, cc = st.checkbox("A"), st.checkbox("B"), st.checkbox("C")
+            cd, ce, cf = st.checkbox("D"), st.checkbox("E"), st.checkbox("F")
+
+            correct_selected = []
+            if ca:
+                correct_selected.append("A")
+            if cb:
+                correct_selected.append("B")
+            if cc:
+                correct_selected.append("C")
+            if cd:
+                correct_selected.append("D")
+            if ce:
+                correct_selected.append("E")
+            if cf:
+                correct_selected.append("F")
+
+            if st.button("Сұрақты Сақтау"):
+                has_extra = bool(opt_e.strip() or opt_f.strip())
+                if not q_text or not (opt_a and opt_b and opt_c and opt_d):
+                    st.error(
+                        "⚠️ А, B, C, D варианттары мен сұрақ толтырылуы тиіс!"
                     )
-                st.success("Деректер сақталды!")
-                st.rerun()
-
-            zam_new_name = st.text_input(
-                "Замның Аты-Жөні:",
-                value=st.session_state.users["zam"].get("name", ""),
-            )
-            new_zam_p = st.text_input(
-                "Жаңа Зам паролі:", type="password", key="np_zam"
-            )
-            if st.button("Зам деректерін жаңарту"):
-                st.session_state.users["zam"]["name"] = zam_new_name
-                if new_zam_p.strip():
-                    st.session_state.users["zam"]["pass"] = new_zam_p.strip()
-                st.success("Деректер сақталды!")
-                st.rerun()
-
-    # --- СҰРАҚ ҚОСУ ЖӘНЕ ОҚУШЫҒА ДОСТУП БЕРУ (ЗАМ/ДИРЕКТОР) ---
-    if role in ["director", "zam"]:
-        st.subheader("⚙️ Сұрақтар мен Оқушыларды басқару")
-        z_tab1, z_tab2 = st.tabs(["📝 Сұрақ Құрастыру", "👤 Оқушы Тіркеу / Доступ"])
-
-        with z_tab1:
-            if role == "zam" and not st.session_state.can_zam_add_q:
-                st.error("⛔ Сұрақ қосуға доступ жабық!")
-            else:
-                selected_sub = st.selectbox(
-                    "Пән таңдаңыз:", list(st.session_state.questions.keys())
-                )
-                q_text = st.text_input("Сұрақтың мәтіні:")
-                img_url = st.text_input(
-                    "🖼️ Сурет сілтемесі (URL, міндетті емес):"
-                )
-
-                st.write("Варианттар (A-F):")
-                c1, c2 = st.columns(2)
-                with c1:
-                    opt_a = st.text_input("A жауабы:")
-                    opt_b = st.text_input("B жауабы:")
-                    opt_c = st.text_input("C жауабы:")
-                with c2:
-                    opt_d = st.text_input("D жауабы:")
-                    opt_e = st.text_input("E жауабы (міндетті емес):")
-                    opt_f = st.text_input("F жауабы (міндетті емес):")
-
-                st.write("Дұрыс жауаптар (макс 3):")
-                ca, cb, cc = (
-                    st.checkbox("A"),
-                    st.checkbox("B"),
-                    st.checkbox("C"),
-                )
-                cd, ce, cf = (
-                    st.checkbox("D"),
-                    st.checkbox("E"),
-                    st.checkbox("F"),
-                )
-
-                correct_selected = []
-                if ca:
-                    correct_selected.append("A")
-                if cb:
-                    correct_selected.append("B")
-                if cc:
-                    correct_selected.append("C")
-                if cd:
-                    correct_selected.append("D")
-                if ce:
-                    correct_selected.append("E")
-                if cf:
-                    correct_selected.append("F")
-
-                if st.button("Сұрақты Сақтау"):
-                    has_extra = bool(opt_e.strip() or opt_f.strip())
-                    if not q_text or not (opt_a and opt_b and opt_c and opt_d):
-                        st.error(
-                            "⚠️ А, B, C, D варианттары мен сұрақ толтырылуы тиіс!"
-                        )
-                    elif len(correct_selected) == 0:
-                        st.error("⚠️ Кемінде 1 дұрыс жауап белгілеңіз!")
-                    elif len(correct_selected) > 3:
-                        st.error(
-                            "⚠️ 3-тен артық дұрыс жауап таңдауға болмайды!"
-                        )
-                    elif not has_extra and len(correct_selected) > 1:
-                        st.error(
-                            "⚠️ 4 вариантты тестіде тек 1 дұрыс жауап болуы керек!"
-                        )
-                    else:
-                        st.session_state.questions[selected_sub].append(
-                            {
-                                "q": q_text,
-                                "options": {
-                                    "A": opt_a,
-                                    "B": opt_b,
-                                    "C": opt_c,
-                                    "D": opt_d,
-                                    "E": opt_e,
-                                    "F": opt_f,
-                                },
-                                "correct": correct_selected,
-                                "image": img_url.strip(),
-                            }
-                        )
-                        st.success("✅ Сұрақ сақталды!")
-
-        with z_tab2:
-            st_fullname = st.text_input("Оқушының Толық Аты-Жөні:")
-            new_st_u = st.text_input("Оқушы логині:")
-            new_st_p = st.text_input("Оқушы паролі:")
-            init_attempts = st.number_input(
-                "Бастапқы доступ саны:", min_value=1, max_value=10, value=1
-            )
-            if st.button("Оқушыны Тіркеу"):
-                if new_st_u and new_st_p and st_fullname:
-                    st.session_state.users[new_st_u] = {
-                        "name": st_fullname,
-                        "pass": new_st_p,
-                        "role": "student",
-                        "fails": 0,
-                        "ban_until": 0,
-                        "attempts": init_attempts,
-                    }
-                    st.success("Оқушы сәтті қосылды!")
+                elif len(correct_selected) == 0:
+                    st.error("⚠️ Кемінде 1 дұрыс жауап белгілеңіз!")
+                elif len(correct_selected) > 3:
+                    st.error("⚠️ 3-тен артық дұрыс жауап таңдауға болмайды!")
+                elif not has_extra and len(correct_selected) > 1:
+                    st.error(
+                        "⚠️ 4 вариантты тестіде тек 1 дұрыс жауап болуы керек!"
+                    )
                 else:
-                    st.error("⚠️ Барлық өрістерді толтырыңыз!")
+                    st.session_state.questions[selected_sub].append(
+                        {
+                            "q": q_text,
+                            "options": {
+                                "A": opt_a,
+                                "B": opt_b,
+                                "C": opt_c,
+                                "D": opt_d,
+                                "E": opt_e,
+                                "F": opt_f,
+                            },
+                            "correct": correct_selected,
+                            "image": img_url.strip(),
+                        }
+                    )
+                    st.success("✅ Сұрақ сақталды!")
 
     # --- ОҚУШЫ ТЕСТІ ЖӘНЕ СЕРТИФИКАТ ---
     if role == "student":
         if st.session_state.last_cert:
             cert = st.session_state.last_cert
 
-            # Сертификат: "KASUM AHMAD TEST ACADEMY" деп өзгертілді
             st.markdown(
                 f"""
             <div class="certificate-box">

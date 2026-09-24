@@ -1,4 +1,4 @@
-Осыfrom datetime import datetime
+from datetime import datetime
 import time
 import pandas as pd
 import streamlit as st
@@ -252,7 +252,6 @@ if "last_cert" not in st.session_state:
 if "review_result" not in st.session_state:
     st.session_state.review_result = None
 
-# Оқушының таңдаған пәнін сақтауға арналған күй
 if "selected_exam_subject" not in st.session_state:
     st.session_state.selected_exam_subject = None
 
@@ -284,9 +283,7 @@ if not st.session_state.logged_user:
                         st.session_state.logged_user = login
                         st.session_state.last_cert = None
                         st.session_state.review_result = None
-                        st.session_state.selected_exam_subject = (
-                            None  # Жаңадан кіргенде пән таңдауды сұрау үшін
-                        )
+                        st.session_state.selected_exam_subject = None
                         login_time = datetime.now().strftime(
                             "%Y-%m-%d %H:%M:%S"
                         )
@@ -837,7 +834,6 @@ else:
                     st.rerun()
 
         else:
-            # Егер оқушы әлі пән таңсама, бірінші пән таңдауын сұраймыз
             if not st.session_state.selected_exam_subject:
                 st.subheader("🎯 Қай пәнді тапсырасыз?")
                 st.write(

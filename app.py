@@ -9,7 +9,7 @@ st.set_page_config(
     page_title="ONLINE TEST SYSTEM", layout="wide", page_icon="📜"
 )
 
-# --- ФАЙЛҒА САҚТАУ ЖӘНЕ ОҚУ ФУНКЦИЯЛАРЫ ---
+# --- ФАЙЛҒА САҚТАУ ЖӘНЕ ОҚУ ---
 DATA_FILE = "app_data.json"
 
 
@@ -31,7 +31,7 @@ def save_data():
     json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-# --- ДЕРЕКТЕРДІ ИНИЦИАЛИЗАЦИЯЛАУ ---
+# --- SESSION STATE ИНИЦИАЛИЗАЦИЯСЫ ---
 saved_data = load_data()
 
 if "users" not in st.session_state:
@@ -88,24 +88,160 @@ if "selected_exam_subject" not in st.session_state:
 
 curr_time = time.time()
 
-# CSS СТИЛЬДЕРІ
+# --- ТОЛЫҚ ДИЗАЙН ЖӘНЕ СТИЛЬДЕР ---
 st.markdown(
     """
     <style>
-    .stApp { background-color: #0b0e14 !important; font-family: 'Trebuchet MS', sans-serif; }
-    .block-container { max-width: 80% !important; padding-top: 2rem !important; }
-    .main-title { font-size: 60px; font-weight: 900; color: #00FF66 !important; margin-bottom: 0px; }
-    .sub-title { font-size: 60px; font-weight: 900; color: #00FF66 !important; text-align: right; }
-    .welcome-text { font-size: 26px !important; font-weight: bold !important; color: #00FF66 !important; background: #131722; padding: 12px 20px; border-radius: 8px; border-left: 5px solid #00FF66; }
-    .question-box { width: 60% !important; margin: 0 auto 30px auto; background: #131722; padding: 25px; border-radius: 12px; border: 1px solid #2a2e39; }
-    h1, h2, h3, h4, h5, h6, p, label, div, span { color: #D1D4DC !important; font-weight: 600 !important; }
-    .stButton>button { background: #2a2e39 !important; color: #00FF66 !important; border: 1.5px solid #00FF66 !important; border-radius: 6px; font-weight: bold !important; }
-    .stButton>button:hover { background: #00FF66 !important; color: #0b0e14 !important; }
-    .certificate-box { border: 10px solid #00FF66; padding: 40px; background: #131722; border-radius: 15px; text-align: center; }
-    .cert-title { font-size: 45px !important; font-weight: 900 !important; color: #00FF66 !important; }
-    .cert-name { font-size: 42px !important; font-weight: 900 !important; color: #FFFFFF !important; border-bottom: 3px solid #00FF66; display: inline-block; }
-    .cert-score { font-size: 45px !important; font-weight: bold !important; color: #00FF66 !important; }
-    .cert-rank { font-size: 26px !important; font-weight: bold !important; color: #FFD700 !important; background: #1e222d; padding: 10px 25px; border-radius: 8px; }
+    .stApp {
+        background-color: #0b0e14 !important;
+        background-image: radial-gradient(circle at 50% 20%, #131722 0%, #0b0e14 100%);
+        font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+    }
+    
+    .block-container {
+        max-width: 80% !important;
+        padding-top: 2rem !important;
+        padding-bottom: 3rem !important;
+    }
+    
+    .main-title {
+        font-size: 60px;
+        font-weight: 900;
+        letter-spacing: 4px;
+        color: #00FF66 !important;
+        margin-bottom: 0px;
+        line-height: 1;
+        text-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
+    }
+    
+    .sub-title {
+        font-size: 60px;
+        font-weight: 900;
+        letter-spacing: 4px;
+        color: #00FF66 !important;
+        text-align: right;
+        margin-top: 0px;
+        line-height: 1;
+        text-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
+    }
+
+    .welcome-text {
+        font-size: 26px !important;
+        font-weight: bold !important;
+        color: #00FF66 !important;
+        background: #131722;
+        padding: 12px 20px;
+        border-radius: 8px;
+        border-left: 5px solid #00FF66;
+        margin-bottom: 20px;
+        box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+    }
+
+    /* СҰРАҚТАР БӨЛІМІ (Шетке шығып кетпейтін етіп ортаға тураланған) */
+    .question-box {
+        width: 100% !important;
+        max-width: 800px;
+        margin: 0 auto 20px auto;
+        background: #131722;
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid #2a2e39;
+        box-shadow: 0 0 20px rgba(0, 255, 102, 0.1);
+    }
+    
+    .question-box h4, .question-box p, .question-box label {
+        font-size: 20px !important;
+        color: #D1D4DC !important;
+    }
+
+    h1, h2, h3, h4, h5, h6, p, label, div, span, small, li { 
+        color: #D1D4DC !important; 
+        font-weight: 600 !important;
+    }
+    
+    .stButton>button { 
+        background: linear-gradient(135deg, #1e222d 0%, #2a2e39 100%) !important; 
+        color: #00FF66 !important; 
+        border: 1.5px solid #00FF66 !important; 
+        border-radius: 6px;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+    }
+    
+    .stButton>button:hover {
+        background: #00FF66 !important;
+        color: #0b0e14 !important;
+        box-shadow: 0 0 20px rgba(0, 255, 102, 0.8);
+    }
+
+    .stTextInput>div>div>input, .stSelectbox>div>div {
+        color: #00FF66 !important;
+        background-color: #1e222d !important;
+        border: 1px solid #2a2e39 !important;
+        border-radius: 6px;
+        font-size: 18px !important;
+    }
+
+    /* ӘДЕМІ СЕРТИФИКАТ СТИЛІ */
+    .certificate-box {
+        border: 10px solid #00FF66;
+        padding: 40px;
+        background: #131722;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    .cert-title {
+        font-size: 42px !important;
+        font-weight: 900 !important;
+        color: #00FF66 !important;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+    .cert-academy {
+        font-size: 20px !important;
+        font-weight: bold !important;
+        color: #848e9c !important;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+    .cert-name {
+        font-size: 38px !important;
+        font-weight: 900 !important;
+        color: #FFFFFF !important;
+        border-bottom: 3px solid #00FF66;
+        display: inline-block;
+        padding-bottom: 5px;
+        margin: 15px 0;
+    }
+    .cert-body {
+        font-size: 20px !important;
+        color: #D1D4DC !important;
+        margin: 10px 0;
+    }
+    .cert-score {
+        font-size: 40px !important;
+        font-weight: bold !important;
+        color: #00FF66 !important;
+        margin: 5px 0;
+    }
+    .cert-rank {
+        font-size: 22px !important;
+        font-weight: bold !important;
+        color: #FFD700 !important;
+        background: #1e222d;
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 8px;
+        border: 1.5px solid #FFD700;
+        margin: 15px 0;
+    }
     </style>
 """,
     unsafe_allow_html=True,
@@ -143,7 +279,7 @@ if not st.session_state.logged_user:
           usr["fails"] += 1
           if usr["fails"] >= 10:
             usr["ban_until"] = curr_time + 1800
-            st.error("⛔ Аккаунт 30 минутқа БАНДАЛДЫ.")
+            st.error("⛔ 10 рет қате! Аккаунт 30 минутқа БАНДАЛДЫ.")
           else:
             st.error(f"❌ Қате пароль! Қалған мүмкіндік: {10 - usr['fails']}")
           save_data()
@@ -345,26 +481,51 @@ else:
         save_data()
         st.success("Сақталды!")
 
-  # --- ОҚУШЫ ТЕСТІ ---
+  # --- ОҚУШЫ ТЕСТІ ЖӘНЕ ҚАТЕЛЕРДІ ТАЛДАУ ---
   if role == "student":
     if st.session_state.last_cert:
       cert = st.session_state.last_cert
+
+      # Әдемі сертификат толық дизайнымен
       st.markdown(
           f"""
             <div class="certificate-box">
                 <div class="cert-title">🏆 СЕРТИФИКАТ 🏆</div>
+                <div class="cert-academy">ONLINE TEST ACADEMY</div>
+                <p class="cert-body">Осы сертификат табысты тест тапсырған оқушыға беріледі:</p>
                 <div class="cert-name">{cert['user_fullname']}</div>
-                <p>Пән: <b>{cert['subject']}</b></p>
+                <br>
+                <p class="cert-body">Пән: <b>{cert['subject']}</b></p>
                 <div class="cert-score">{cert['score']}</div>
                 <div class="cert-rank">Орны: {cert['rank']}-орын</div>
             </div>
             """,
           unsafe_allow_html=True,
       )
-      if st.button("Шығу"):
+
+      # Қай сұрақтан қате кеткені көрініп тұратын бөлім
+      if st.session_state.review_result:
+        st.subheader("📋 Сіздің жауаптарыңыз бен қателерді талдау:")
+        for item in st.session_state.review_result:
+          color = "#00FF66" if item["is_correct"] else "#FF4B4B"
+          status_text = "✅ Дұрыс" if item["is_correct"] else "❌ Қате"
+          st.markdown(
+              f"""
+                    <div style="background:#131722; padding:15px; border-radius:8px; border-left:5px solid {color}; margin-bottom:10px;">
+                        <p style="margin:0; font-size:18px;"><b>{item['q_num']}. {item['question']}</b></p>
+                        <p style="margin:5px 0 0 0;">Сіздің жауабыңыз: <code>{', '.join(item['user_ans']) if item['user_ans'] else 'Бос'}</code> | Дұрыс жауап: <code>{', '.join(item['correct_ans'])}</code> - <b style="color:{color};">{status_text}</b></p>
+                    </div>
+                    """,
+              unsafe_allow_html=True,
+          )
+
+      if st.button("🚪 Жүйеден шығу (Logout)"):
         st.session_state.logged_user = None
         st.session_state.last_cert = None
+        st.session_state.review_result = None
+        st.session_state.selected_exam_subject = None
         st.rerun()
+
     else:
       if not st.session_state.selected_exam_subject:
         st.subheader("🎯 Пәнді таңдаңыз")
@@ -385,18 +546,38 @@ else:
           user_answers = {}
           for i, q in enumerate(q_list):
             st.markdown(
-                f'<div class="question-box"><h4>{i+1}. {q["q"]}</h4></div>',
+                f"""
+                        <div class="question-box">
+                            <h4>❓ {i+1}-сұрақ: {q['q']}</h4>
+                        </div>
+                        """,
                 unsafe_allow_html=True,
             )
             opts = [f"{k}) {v}" for k, v in q["options"].items() if v.strip()]
-            ans = st.radio("Жауап:", opts, key=f"ans_{i}")
+            ans = st.radio("Жауапты таңдаңыз:", opts, key=f"ans_{i}")
             user_answers[i] = [ans[0]]
 
-          if st.button("Тестті аяқтау"):
+          if st.button("🚀 Тестті аяқтау"):
             score = 0
+            review_data = []
+
             for i, q in enumerate(q_list):
-              if set(user_answers.get(i, [])) == set(q["correct"]):
+              u_ans = set(user_answers.get(i, []))
+              c_ans = set(q["correct"])
+              is_corr = u_ans == c_ans and len(u_ans) > 0
+
+              if is_corr:
                 score += 1
+
+              review_data.append(
+                  {
+                      "q_num": i + 1,
+                      "question": q["q"],
+                      "user_ans": list(u_ans),
+                      "correct_ans": list(c_ans),
+                      "is_correct": is_corr,
+                  }
+              )
 
             total = len(q_list)
             st.session_state.last_cert = {
@@ -405,5 +586,6 @@ else:
                 "score": f"{score} / {total}",
                 "rank": 1,
             }
+            st.session_state.review_result = review_data
             save_data()
             st.rerun()
